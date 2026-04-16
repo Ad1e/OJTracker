@@ -29,26 +29,6 @@ interface StatsCardProps {
     target?: number;
 }
 
-// ─── Accent maps ─────────────────────────────────────────────────────────────
-
-const ringColor: Record<StatItem["accent"], string> = {
-    indigo: "text-indigo-500",
-    emerald: "text-emerald-500",
-    amber: "text-amber-500",
-};
-
-const badgeBg: Record<StatItem["accent"], string> = {
-    indigo: "bg-indigo-50 text-indigo-700 ring-indigo-200",
-    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-    amber: "bg-amber-50 text-amber-700 ring-amber-200",
-};
-
-const progressTrack: Record<StatItem["accent"], string> = {
-    indigo: "bg-indigo-500",
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-};
-
 // ─── SVG Mini-Arc ─────────────────────────────────────────────────────────────
 
 interface MiniArcProps {
@@ -57,9 +37,9 @@ interface MiniArcProps {
 }
 
 const arcColorStroke: Record<StatItem["accent"], string> = {
-    indigo: "#6366f1",
-    emerald: "#10b981",
-    amber: "#f59e0b",
+    indigo: "#818cf8", // lighter indigo
+    emerald: "#34d399",
+    amber: "#fbbf24",
 };
 
 function MiniArc({ percent, accent }: MiniArcProps) {
@@ -69,13 +49,22 @@ function MiniArc({ percent, accent }: MiniArcProps) {
     const circumference = 2 * Math.PI * r;
     const dashOffset = circumference - (percent / 100) * circumference;
 
+    const [offset, setOffset] = React.useState(circumference);
+    
+    React.useEffect(() => {
+        // Trigger animation after mount
+        const t = setTimeout(() => setOffset(dashOffset), 50);
+        return () => clearTimeout(t);
+    }, [dashOffset]);
+
     return (
-        <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
+        <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" className="drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
             {/* Track */}
             <circle
                 cx={cx} cy={cy} r={r}
                 fill="none"
-                stroke="#e2e8f0"
+                stroke="currentColor"
+                className="text-slate-700/50"
                 strokeWidth="5"
             />
             {/* Fill */}
@@ -86,9 +75,9 @@ function MiniArc({ percent, accent }: MiniArcProps) {
                 strokeWidth="5"
                 strokeLinecap="round"
                 strokeDasharray={circumference}
-                strokeDashoffset={dashOffset}
+                strokeDashoffset={offset}
                 transform={`rotate(-90 ${cx} ${cy})`}
-                style={{ transition: "stroke-dashoffset 0.6s ease" }}
+                style={{ transition: "stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)" }}
             />
         </svg>
     );
@@ -122,18 +111,22 @@ const IconTrendUp = () => (
 
 function Card({ item }: { item: StatItem }) {
     return (
-        <div className="relative flex flex-col justify-between rounded-2xl bg-white border border-slate-100 shadow-sm shadow-slate-100 p-6 overflow-hidden transition-shadow hover:shadow-md hover:shadow-slate-200">
+        <div className="glass-card relative flex flex-col justify-between p-6 overflow-hidden group">
 
             {/* Subtle corner decoration */}
             <div
-                className="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full opacity-[0.06]"
+                className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full mix-blend-screen opacity-20 blur-3xl transition-opacity group-hover:opacity-40"
                 style={{ background: arcColorStroke[item.accent] }}
             />
 
             {/* Header */}
-            <div className="flex items-start justify-between mb-4">
-                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1 ${badgeBg[item.accent]}`}>
-                    <span className={ringColor[item.accent]}>{item.icon}</span>
+            <div className="flex items-start justify-between mb-4 relative z-10">
+                <span className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full ring-1 shadow-sm backdrop-blur-md ${
+                    item.accent === 'indigo' ? 'bg-indigo-500/10 text-indigo-300 ring-indigo-500/30' :
+                    item.accent === 'emerald' ? 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/30' :
+                    'bg-amber-500/10 text-amber-300 ring-amber-500/30'
+                }`}>
+                    <span className={item.accent === 'indigo' ? 'text-indigo-400' : item.accent === 'emerald' ? 'text-emerald-400' : 'text-amber-400'}>{item.icon}</span>
                     {item.label}
                 </span>
 
@@ -143,25 +136,29 @@ function Card({ item }: { item: StatItem }) {
             </div>
 
             {/* Value */}
-            <div>
-                <p className="text-4xl font-bold tracking-tight text-slate-800">
+            <div className="relative z-10">
+                <p className="font-display text-4xl font-bold tracking-tight text-white drop-shadow-sm">
                     {item.value}
                 </p>
                 {item.sub && (
-                    <p className="mt-1 text-sm text-slate-400 font-medium">{item.sub}</p>
+                    <p className="mt-1.5 text-[13px] text-slate-400 font-medium leading-snug">{item.sub}</p>
                 )}
             </div>
 
             {/* Bottom micro-progress bar */}
             {item.fill !== undefined && (
-                <div className="mt-5">
-                    <div className="flex justify-between text-[11px] font-semibold text-slate-400 mb-1.5">
+                <div className="mt-6 relative z-10">
+                    <div className="flex justify-between text-[11px] font-semibold text-slate-400 mb-2">
                         <span>Progress</span>
-                        <span>{item.fill}%</span>
+                        <span className="text-slate-300">{item.fill}%</span>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-slate-100">
+                    <div className="h-1.5 w-full rounded-full bg-slate-800/80 shadow-inner border border-slate-700/50 overflow-hidden">
                         <div
-                            className={`h-full rounded-full ${progressTrack[item.accent]} transition-all duration-700`}
+                            className={`h-full rounded-full ${
+                                item.accent === 'indigo' ? 'bg-gradient-to-r from-indigo-600 to-indigo-400' :
+                                item.accent === 'emerald' ? 'bg-gradient-to-r from-emerald-600 to-emerald-400' :
+                                'bg-gradient-to-r from-amber-600 to-amber-400'
+                            } transition-all duration-1000 ease-out`}
                             style={{ width: `${item.fill}%` }}
                         />
                     </div>

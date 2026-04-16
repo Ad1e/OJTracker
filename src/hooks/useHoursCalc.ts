@@ -3,11 +3,15 @@ import { useMemo } from "react";
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface LogEntry {
-    id: string;
+    id: string;            // We'll generate/map this in App.tsx
+    day: number;
     date: string;          // ISO 8601 → "YYYY-MM-DD"
+    startTime: string;
+    endTime: string;
+    hoursWorked: number;   // 0–24
     activity: string;
-    hours: number;         // 0–24
     isHoliday: boolean;
+    category: string;
 }
 
 export interface HoursCalcResult {
@@ -86,7 +90,7 @@ export function useHoursCalc(
                 continue;
             }
 
-            totalRendered += entry.hours;
+            totalRendered += entry.hoursWorked;
             workingDaysLogged++;
         }
 
@@ -131,4 +135,4 @@ export function useHoursCalc(
             avgHoursPerDay,
         };
     }, [logs, target]);
-}
+}

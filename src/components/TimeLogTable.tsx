@@ -3,7 +3,7 @@ import type { LogEntry } from "../hooks/useHoursCalc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SortKey = keyof Pick<LogEntry, "date" | "activity" | "hours">;
+type SortKey = keyof Pick<LogEntry, "date" | "activity" | "hoursWorked">;
 type SortDir = "asc" | "desc";
 
 interface SortState {
@@ -123,7 +123,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                 (e) =>
                     e.activity.toLowerCase().includes(q) ||
                     e.date.includes(q) ||
-                    String(e.hours).includes(q)
+                    String(e.hoursWorked).includes(q)
             );
         }
 
@@ -132,7 +132,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
             let cmp = 0;
             if (sort.key === "date") cmp = a.date.localeCompare(b.date);
             else if (sort.key === "activity") cmp = a.activity.localeCompare(b.activity);
-            else if (sort.key === "hours") cmp = a.hours - b.hours;
+            else if (sort.key === "hours") cmp = a.hoursWorked - b.hoursWorked;
             return sort.dir === "asc" ? cmp : -cmp;
         });
 
@@ -141,19 +141,19 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
 
     // ── Totals row ────────────────────────────────────────────────────────────
     const visibleHours = useMemo(
-        () => processed.filter((e) => !e.isHoliday).reduce((s, e) => s + e.hours, 0),
+        () => processed.filter((e) => !e.isHoliday).reduce((s, e) => s + e.hoursWorked, 0),
         [processed]
     );
 
     const thClass =
-        "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 select-none cursor-pointer hover:text-slate-700 transition-colors";
-    const tdClass = "px-4 py-3.5 text-sm text-slate-700 align-middle";
+        "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-300 select-none cursor-pointer transition-colors";
+    const tdClass = "px-4 py-3.5 text-sm text-slate-300 align-middle border-b border-slate-700/50";
 
     return (
-        <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <div className="glass-card overflow-hidden">
 
             {/* ── Toolbar ─────────────────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50/60">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-5 border-b border-slate-700/50 bg-slate-800/30">
 
                 {/* Search */}
                 <div className="relative flex-1 max-w-sm">
@@ -166,7 +166,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Search activities, dates…"
-                        className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+                        className="w-full pl-9 pr-8 py-2 text-sm rounded-lg border border-slate-700 bg-surface text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition"
                     />
                     {query && (
                         <button
@@ -187,9 +187,9 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${filter === f
-                                ? "bg-indigo-600 text-white shadow-sm"
-                                : "bg-white border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                            className={`px-4 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${filter === f
+                                ? "bg-accent text-white shadow-[0_0_10px_rgba(99,102,241,0.4)]"
+                                : "bg-surface border border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-300"
                                 }`}
                         >
                             {f === "all" ? "All" : f === "work" ? "Work Days" : "Holidays"}
@@ -205,9 +205,9 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
 
             {/* ── Table ───────────────────────────────────────────────────────── */}
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[560px]">
-                    <thead>
-                        <tr className="border-b border-slate-100">
+                <table className="w-full min-w-[640px]">
+                    <thead className="bg-slate-800/50">
+                        <tr>
                             <th className={thClass} onClick={() => handleSort("date")} style={{ width: "130px" }}>
                                 <span className="inline-flex items-center">
                                     Date <SortIcon active={sort.key === "date"} dir={sort.dir} />
@@ -218,9 +218,9 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                     Activity <SortIcon active={sort.key === "activity"} dir={sort.dir} />
                                 </span>
                             </th>
-                            <th className={`${thClass} text-right`} onClick={() => handleSort("hours")} style={{ width: "90px" }}>
+                            <th className={`${thClass} text-right`} onClick={() => handleSort("hoursWorked")} style={{ width: "90px" }}>
                                 <span className="inline-flex items-center justify-end w-full">
-                                    Hours <SortIcon active={sort.key === "hours"} dir={sort.dir} />
+                                    Hours <SortIcon active={sort.key === "hoursWorked"} dir={sort.dir} />
                                 </span>
                             </th>
                             <th className={`${thClass} text-center`} style={{ width: "100px" }}>Status</th>
@@ -228,14 +228,14 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                         </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-50">
+                    <tbody className="divide-y divide-slate-700/30">
                         {processed.length === 0 ? (
                             <EmptyState hasQuery={!!query} />
                         ) : (
                             processed.map((entry, idx) => (
                                 <tr
                                     key={entry.id}
-                                    className={`group transition-colors hover:bg-indigo-50/40 ${entry.isHoliday ? "bg-amber-50/40" : idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"
+                                    className={`group transition-colors hover:bg-slate-800/40 ${entry.isHoliday ? "bg-amber-900/10" : idx % 2 === 0 ? "bg-surface" : "bg-slate-800/20"
                                         }`}
                                 >
                                     {/* Date */}
@@ -253,21 +253,23 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                     {/* Hours */}
                                     <td className={`${tdClass} text-right font-semibold tabular-nums`}>
                                         {entry.isHoliday ? (
-                                            <span className="text-slate-300">—</span>
+                                            <span className="text-slate-600">—</span>
                                         ) : (
-                                            <span className="text-slate-800">{entry.hours}h</span>
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded backdrop-blur-sm bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 shadow-[0_0_10px_rgba(99,102,241,0.1)]">
+                                                {entry.hoursWorked}h
+                                            </span>
                                         )}
                                     </td>
 
                                     {/* Status badge */}
                                     <td className={`${tdClass} text-center`}>
                                         {entry.isHoliday ? (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700 ring-1 ring-amber-200">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/30 shadow-[0_0_10px_rgba(251,191,36,0.1)]">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 drop-shadow-[0_0_2px_rgba(251,191,36,0.8)]" />
                                                 Holiday
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/30">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                                                 Work
                                             </span>
@@ -276,11 +278,11 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
 
                                     {/* Actions */}
                                     <td className={`${tdClass} text-center`}>
-                                        <div className="inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="inline-flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => onEdit(entry)}
                                                 title="Edit entry"
-                                                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                                                className="p-1.5 rounded border border-transparent hover:border-slate-600 bg-slate-800/0 hover:bg-slate-800/80 text-slate-400 hover:text-accent transition-all"
                                             >
                                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                                     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
@@ -290,7 +292,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                             <button
                                                 onClick={() => onDelete(entry.id)}
                                                 title="Delete entry"
-                                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                className="p-1.5 rounded border border-transparent hover:border-red-900/50 bg-slate-800/0 hover:bg-red-900/20 text-slate-400 hover:text-red-400 transition-all"
                                             >
                                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                                     <polyline points="3 6 5 6 21 6" />
@@ -309,11 +311,11 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                     {/* ── Totals footer ──────────────────────────────────────────── */}
                     {processed.length > 0 && (
                         <tfoot>
-                            <tr className="border-t-2 border-slate-200 bg-slate-50">
-                                <td colSpan={2} className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                            <tr className="bg-slate-800/50 border-t flex-none border-slate-700/50 shadow-[0_-4px_10px_rgba(0,0,0,0.2)] relative z-10">
+                                <td colSpan={2} className="px-4 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-widest text-right">
                                     Subtotal (visible rows)
                                 </td>
-                                <td className="px-4 py-3 text-right font-bold text-indigo-700 tabular-nums">
+                                <td className="px-4 py-3.5 text-right font-display text-lg font-bold text-accent tabular-nums drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">
                                     {visibleHours.toFixed(1)}h
                                 </td>
                                 <td colSpan={2} />
