@@ -1,72 +1,380 @@
-[
-    {
-        "id": "log-001",
-        "date": "2025-06-02",
-        "activity": "Orientation & onboarding walkthrough with IT department",
-        "hours": 8,
-        "isHoliday": false
+{
+    "config": {
+        "internName": "Aldwin C. Mazan",
+        "totalRequiredHours": 500,
+        "department": "CICS-IT-4202",
+        "supervisor": "Engr. Rodrigo Rodolfo A. Irineo Jr."
     },
-    {
-        "id": "log-002",
-        "date": "2025-06-03",
-        "activity": "Set up development environment (Node, VS Code, Git)",
-        "hours": 7.5,
-        "isHoliday": false
-    },
-    {
-        "id": "log-003",
-        "date": "2025-06-04",
-        "activity": "Independence Day — National Holiday",
-        "hours": 0,
-        "isHoliday": true
-    },
-    {
-        "id": "log-004",
-        "date": "2025-06-05",
-        "activity": "React fundamentals review & component architecture study",
-        "hours": 8,
-        "isHoliday": false
-    },
-    {
-        "id": "log-005",
-        "date": "2025-06-06",
-        "activity": "Built internal inventory CRUD UI prototype",
-        "hours": 8,
-        "isHoliday": false
-    },
-    {
-        "id": "log-006",
-        "date": "2025-06-09",
-        "activity": "API integration with backend team — REST endpoint testing",
-        "hours": 7,
-        "isHoliday": false
-    },
-    {
-        "id": "log-007",
-        "date": "2025-06-10",
-        "activity": "Attended sprint planning and daily standup",
-        "hours": 6.5,
-        "isHoliday": false
-    },
-    {
-        "id": "log-008",
-        "date": "2025-06-11",
-        "activity": "Debugging authentication flow — JWT token refresh issue",
-        "hours": 8,
-        "isHoliday": false
-    },
-    {
-        "id": "log-009",
-        "date": "2025-06-12",
-        "activity": "Independence Day Observance — Special Non-Working Holiday",
-        "hours": 0,
-        "isHoliday": true
-    },
-    {
-        "id": "log-010",
-        "date": "2025-06-13",
-        "activity": "Code review session with senior dev + documentation writing",
-        "hours": 7.5,
-        "isHoliday": false
-    }
-]
+    "entries": [
+        {
+            "day": 1,
+            "date": "2026-02-19",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Created a T-Shirt Design for Fire Prevention Month; Did a shoot for Do's and Don'ts for Fire Prevention Month",
+            "isHoliday": false,
+            "category": "Design/Media"
+        },
+        {
+            "day": 2,
+            "date": "2026-02-20",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Attended a Fire Safety Training for Fire Drill",
+            "isHoliday": false,
+            "category": "Training"
+        },
+        {
+            "day": 5,
+            "date": "2026-02-23",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Shoot for Fire Prevention Month; Attended the DPWH Job Fair",
+            "isHoliday": false,
+            "category": "Media/Events"
+        },
+        {
+            "day": 6,
+            "date": "2026-02-24",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Collaborated with Team GADC; completed a QA review and presented findings and identified improvements to Sir Rod and Sir Erwin",
+            "isHoliday": false,
+            "category": "QA/Collaboration"
+        },
+        {
+            "day": 7,
+            "date": "2026-02-25",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Reviewed the documentation for the GUIDE Website",
+            "isHoliday": false,
+            "category": "Documentation"
+        },
+        {
+            "day": 8,
+            "date": "2026-02-26",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Video Editing for Fire Prevention Month Video; Document Dispatch",
+            "isHoliday": false,
+            "category": "Media/Admin"
+        },
+        {
+            "day": 9,
+            "date": "2026-02-27",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Cloned the repository then started a quick code review for the new mock design of GUIDE Web that replaced the 'MAIN' codebase",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 10,
+            "date": "2026-03-02",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Setup equipments for NSFD; Participated for the rehearsal of NSFD; Managing Inbound/Outbound Calls",
+            "isHoliday": false,
+            "category": "Operations/Admin"
+        },
+        {
+            "day": 11,
+            "date": "2026-03-03",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Participated in NSFD (used a megaphone to alarm the Students/Teachers in CTE Building)",
+            "isHoliday": false,
+            "category": "Operations"
+        },
+        {
+            "day": 12,
+            "date": "2026-03-04",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Setup in the Boardroom, managed the sound system and microphones; Did minutes for the integration of PWDs and students with special needs into the university's (BEEP)",
+            "isHoliday": false,
+            "category": "Operations/Admin"
+        },
+        {
+            "day": 13,
+            "date": "2026-03-05",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Editing Do's and Don'ts for Fire Prevention",
+            "isHoliday": false,
+            "category": "Media"
+        },
+        {
+            "day": 14,
+            "date": "2026-03-06",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Participated in Fire Olympic Training",
+            "isHoliday": false,
+            "category": "Training"
+        },
+        {
+            "day": 15,
+            "date": "2026-03-09",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Video Shoot/Edit for Heat Index; Managing Inbound/Outbound Calls",
+            "isHoliday": false,
+            "category": "Media/Admin"
+        },
+        {
+            "day": 16,
+            "date": "2026-03-10",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Helped edit the Fire Prevention video",
+            "isHoliday": false,
+            "category": "Media"
+        },
+        {
+            "day": 17,
+            "date": "2026-03-11",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Did a shoot for Heat Index; Prepare Fire Drill Equipments",
+            "isHoliday": false,
+            "category": "Media/Operations"
+        },
+        {
+            "day": 18,
+            "date": "2026-03-12",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Handling documents; Reported to the dean's office",
+            "isHoliday": false,
+            "category": "Admin"
+        },
+        {
+            "day": 19,
+            "date": "2026-03-16",
+            "startTime": "07:00 AM",
+            "endTime": "04:00 PM",
+            "hoursWorked": 8,
+            "activity": "Editing the Fire Drill Video; Cloned and Setup the GUIDE Website in the laptop",
+            "isHoliday": false,
+            "category": "Media/Development"
+        },
+        {
+            "day": 20,
+            "date": "2026-03-17",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Assigned to Project KLIMA; Planning on the development structure of KLIMA",
+            "isHoliday": false,
+            "category": "Planning/Development"
+        },
+        {
+            "day": 21,
+            "date": "2026-03-18",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Conducted review for Old Design; Setup REACT Framework for new Design; Started Developing KLIMA User Interface",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 22,
+            "date": "2026-03-19",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Development of KLIMA",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 23,
+            "date": "2026-03-23",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Development of KLIMA",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 24,
+            "date": "2026-03-24",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Development of KLIMA",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 25,
+            "date": "2026-03-25",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Development of KLIMA; Assigned to Develop CCTV Dashboard for 11 Campuses",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 26,
+            "date": "2026-03-26",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Development of KLIMA; Document Dispatch",
+            "isHoliday": false,
+            "category": "Development/Admin"
+        },
+        {
+            "day": 27,
+            "date": "2026-03-30",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Created Github Repository for CCTV Dashboard; Research; Set up folder structure and installed dependencies like hls.js and lucide-react",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 28,
+            "date": "2026-03-31",
+            "startTime": "08:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 8,
+            "activity": "Successfully set up the foundation for the 11-campus CCTV Dashboard (UI Design Only)",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 29,
+            "date": "2026-04-06",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Development of the CCTV Dashboard; Implemented Mock CCTV video for testing (footage still not working)",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 30,
+            "date": "2026-04-07",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Revisions for the KLIMA UI; Document Dispatch",
+            "isHoliday": false,
+            "category": "Development/Admin"
+        },
+        {
+            "day": 31,
+            "date": "2026-04-08",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Continued developing the CCTV Dashboard",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 32,
+            "date": "2026-04-13",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Presented the Finalized UI of KLIMA",
+            "isHoliday": false,
+            "category": "Development/Presentation"
+        },
+        {
+            "day": 33,
+            "date": "2026-04-14",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Continued the Development of CCTV Dashboard",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 34,
+            "date": "2026-04-15",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Asked for the Legit RTSP of the CCTV Camera; Implemented fixes for dashboard footage display",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 35,
+            "date": "2026-04-16",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Implemented Snapshot feature in CCTV footage with SQLite backend; Document Dispatch",
+            "isHoliday": false,
+            "category": "Development/Admin"
+        },
+        {
+            "day": 36,
+            "date": "2026-04-20",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Developed RDANA digital reporting system and assessment UI to replace manual Google Docs",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 37,
+            "date": "2026-04-21",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Duty Ongoing (RDANA Development)",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 38,
+            "date": "2026-04-22",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Duty Ongoing (RDANA Development)",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 39,
+            "date": "2026-04-23",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 10,
+            "activity": "Duty Ongoing (RDANA Development)",
+            "isHoliday": false,
+            "category": "Development"
+        }
+    ]
+}
