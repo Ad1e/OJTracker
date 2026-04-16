@@ -5,6 +5,7 @@
 @layer base {
   body {
     @apply bg-background text-slate-300 font-sans antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -23,5 +24,9 @@
   
   .glass-card:hover {
     @apply shadow-2xl shadow-accent/10 border-slate-600/50 -translate-y-1;
+  }
+  
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }

@@ -132,7 +132,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
             let cmp = 0;
             if (sort.key === "date") cmp = a.date.localeCompare(b.date);
             else if (sort.key === "activity") cmp = a.activity.localeCompare(b.activity);
-            else if (sort.key === "hours") cmp = a.hoursWorked - b.hoursWorked;
+            else if (sort.key === "hoursWorked") cmp = a.hoursWorked - b.hoursWorked;
             return sort.dir === "asc" ? cmp : -cmp;
         });
 

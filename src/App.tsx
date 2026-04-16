@@ -3,6 +3,7 @@ import { useHoursCalc, type LogEntry } from "./hooks/useHoursCalc";
 import { StatsCard } from "./components/StatsCard";
 import { TimeLogTable } from "./components/TimeLogTable";
 import { LogForm } from "./components/LogForm";
+import { Charts } from "./components/Charts";
 import seedData from "./data/journalData.json";
 
 // ─── Seed data cast ───────────────────────────────────────────────────────────
@@ -163,7 +164,7 @@ export default function App() {
           <div className="flex items-end justify-between mb-5">
             <div>
               <h3 className="text-base font-display text-white">Total Progress</h3>
-              <p className="text-sm text-slate-400 mt-1">
+              <p className="text-sm text-slate-400 mt-1 tabular-nums">
                 {stats.remaining > 0
                   ? `${stats.remaining.toFixed(1)} hours remaining`
                   : "All hours completed!"}
@@ -199,6 +200,16 @@ export default function App() {
             <span>375 h</span>
             <span>{TARGET} h</span>
           </div>
+        </section>
+
+        {/* ── Analytics Charts ────────────────────────────────────────── */}
+        <section>
+          <div className="mb-5 ml-1">
+            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+              Analytics
+            </h2>
+          </div>
+          <Charts logs={logs} />
         </section>
 
         {/* ── Log table ───────────────────────────────────────────────── */}

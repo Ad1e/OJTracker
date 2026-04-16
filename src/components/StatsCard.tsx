@@ -137,7 +137,7 @@ function Card({ item }: { item: StatItem }) {
 
             {/* Value */}
             <div className="relative z-10">
-                <p className="font-display text-4xl font-bold tracking-tight text-white drop-shadow-sm">
+                <p className="font-display text-4xl font-bold tracking-tight text-white drop-shadow-sm tabular-nums">
                     {item.value}
                 </p>
                 {item.sub && (
@@ -150,7 +150,7 @@ function Card({ item }: { item: StatItem }) {
                 <div className="mt-6 relative z-10">
                     <div className="flex justify-between text-[11px] font-semibold text-slate-400 mb-2">
                         <span>Progress</span>
-                        <span className="text-slate-300">{item.fill}%</span>
+                        <span className="text-slate-300 tabular-nums">{item.fill}%</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-slate-800/80 shadow-inner border border-slate-700/50 overflow-hidden">
                         <div
