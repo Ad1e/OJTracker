@@ -1,0 +1,72 @@
+[
+    {
+        "id": "log-001",
+        "date": "2025-06-02",
+        "activity": "Orientation & onboarding walkthrough with IT department",
+        "hours": 8,
+        "isHoliday": false
+    },
+    {
+        "id": "log-002",
+        "date": "2025-06-03",
+        "activity": "Set up development environment (Node, VS Code, Git)",
+        "hours": 7.5,
+        "isHoliday": false
+    },
+    {
+        "id": "log-003",
+        "date": "2025-06-04",
+        "activity": "Independence Day — National Holiday",
+        "hours": 0,
+        "isHoliday": true
+    },
+    {
+        "id": "log-004",
+        "date": "2025-06-05",
+        "activity": "React fundamentals review & component architecture study",
+        "hours": 8,
+        "isHoliday": false
+    },
+    {
+        "id": "log-005",
+        "date": "2025-06-06",
+        "activity": "Built internal inventory CRUD UI prototype",
+        "hours": 8,
+        "isHoliday": false
+    },
+    {
+        "id": "log-006",
+        "date": "2025-06-09",
+        "activity": "API integration with backend team — REST endpoint testing",
+        "hours": 7,
+        "isHoliday": false
+    },
+    {
+        "id": "log-007",
+        "date": "2025-06-10",
+        "activity": "Attended sprint planning and daily standup",
+        "hours": 6.5,
+        "isHoliday": false
+    },
+    {
+        "id": "log-008",
+        "date": "2025-06-11",
+        "activity": "Debugging authentication flow — JWT token refresh issue",
+        "hours": 8,
+        "isHoliday": false
+    },
+    {
+        "id": "log-009",
+        "date": "2025-06-12",
+        "activity": "Independence Day Observance — Special Non-Working Holiday",
+        "hours": 0,
+        "isHoliday": true
+    },
+    {
+        "id": "log-010",
+        "date": "2025-06-13",
+        "activity": "Code review session with senior dev + documentation writing",
+        "hours": 7.5,
+        "isHoliday": false
+    }
+]
