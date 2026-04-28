@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
     LineChart,
     Line,
@@ -24,7 +24,11 @@ interface ChartsProps {
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 
+// FIX (Task 5): Added all compound/variant categories found in journalData.json.
+// The fuzzy matcher below also handles any remaining unknown variants by
+// checking if the category string includes one of the base known keys.
 const CATEGORY_COLORS: Record<string, string> = {
+    // Primary categories
     "Design/Media": "#818cf8",
     "Training": "#34d399",
     "QA/Collaboration": "#fbbf24",
@@ -32,10 +36,32 @@ const CATEGORY_COLORS: Record<string, string> = {
     "Documentation": "#60a5fa",
     "Events": "#c084fc",
     "Admin": "#94a3b8",
+    // Variant / compound categories from journalData.json
+    "Media/Events": "#c084fc",
+    "Operations/Admin": "#94a3b8",
+    "Media/Admin": "#818cf8",
+    "Media/Development": "#818cf8",
+    "Planning/Development": "#f87171",
+    "Development/Admin": "#f87171",
+    "Development/Presentation": "#f87171",
+    "Operations": "#64748b",
+    "Media/Operations": "#818cf8",
+    "Media": "#818cf8",
 };
 
-const getColorForCategory = (category: string): string => {
-    return CATEGORY_COLORS[category] || "#6366f1";
+// FIX: Fuzzy match — if an exact entry exists use it; otherwise try to find
+// a known base key that is contained in the category string. This future-proofs
+// any new compound categories that might be added.
+export const getColorForCategory = (category: string): string => {
+    if (CATEGORY_COLORS[category]) return CATEGORY_COLORS[category];
+    const baseKeys = [
+        "Design/Media", "Training", "QA/Collaboration", "Development",
+        "Documentation", "Events", "Admin", "Operations", "Media",
+    ];
+    for (const key of baseKeys) {
+        if (category.includes(key)) return CATEGORY_COLORS[key] || "#6366f1";
+    }
+    return "#6366f1";
 };
 
 // ─── Cumulative Hours Chart ───────────────────────────────────────────────────
@@ -123,17 +149,16 @@ function CategoryBreakdownChart({ logs }: ChartsProps) {
             <h3 className="text-base font-display font-semibold text-white mb-4">
                 🎯 Hours by Category
             </h3>
+            {/* FIX: Removed inline `label` prop from <Pie> — it overflows on small screens.
+                Using <Legend> instead for better responsiveness. */}
             <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                     <Pie
                         data={data}
                         cx="50%"
-                        cy="50%"
+                        cy="45%"
                         labelLine={false}
-                        label={({ name, value }) =>
-                            `${name}: ${value.toFixed(1)}h`
-                        }
-                        outerRadius={80}
+                        outerRadius={90}
                         fill="#8884d8"
                         dataKey="value"
                     >
@@ -151,7 +176,13 @@ function CategoryBreakdownChart({ logs }: ChartsProps) {
                             borderRadius: "8px",
                             color: "#e2e8f0",
                         }}
-                        formatter={(value) => `${value.toFixed(1)}h`}
+                        formatter={(value: number) => [`${value.toFixed(1)}h`, "Hours"]}
+                    />
+                    <Legend
+                        wrapperStyle={{ fontSize: "11px", color: "#94a3b8", paddingTop: "8px" }}
+                        formatter={(value) => (
+                            <span style={{ color: "#94a3b8" }}>{value}</span>
+                        )}
                     />
                 </PieChart>
             </ResponsiveContainer>
@@ -202,7 +233,7 @@ function DailyDistributionChart({ logs }: ChartsProps) {
                             borderRadius: "8px",
                             color: "#e2e8f0",
                         }}
-                        formatter={(value) => `${value.toFixed(1)}h`}
+                        formatter={(value: number) => [`${value.toFixed(1)}h`, "Hours"]}
                     />
                     <Bar
                         dataKey="hours"

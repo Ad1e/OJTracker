@@ -3,7 +3,9 @@
         "internName": "Aldwin C. Mazan",
         "totalRequiredHours": 500,
         "department": "CICS-IT-4202",
-        "supervisor": "Engr. Rodrigo Rodolfo A. Irineo Jr."
+        "supervisor": "Engr. Rodrigo Rodolfo A. Irineo Jr.",
+        "school": "Batangas State University",
+        "startDate": "2026-02-19"
     },
     "entries": [
         {
@@ -34,7 +36,7 @@
             "hoursWorked": 8,
             "activity": "Shoot for Fire Prevention Month; Attended the DPWH Job Fair",
             "isHoliday": false,
-            "category": "Media/Events"
+            "category": "Events"
         },
         {
             "day": 6,
@@ -64,7 +66,7 @@
             "hoursWorked": 8,
             "activity": "Video Editing for Fire Prevention Month Video; Document Dispatch",
             "isHoliday": false,
-            "category": "Media/Admin"
+            "category": "Design/Media"
         },
         {
             "day": 9,
@@ -84,7 +86,7 @@
             "hoursWorked": 8,
             "activity": "Setup equipments for NSFD; Participated for the rehearsal of NSFD; Managing Inbound/Outbound Calls",
             "isHoliday": false,
-            "category": "Operations/Admin"
+            "category": "Admin"
         },
         {
             "day": 11,
@@ -94,7 +96,7 @@
             "hoursWorked": 8,
             "activity": "Participated in NSFD (used a megaphone to alarm the Students/Teachers in CTE Building)",
             "isHoliday": false,
-            "category": "Operations"
+            "category": "Events"
         },
         {
             "day": 12,
@@ -104,7 +106,7 @@
             "hoursWorked": 8,
             "activity": "Setup in the Boardroom, managed the sound system and microphones; Did minutes for the integration of PWDs and students with special needs into the university's (BEEP)",
             "isHoliday": false,
-            "category": "Operations/Admin"
+            "category": "Admin"
         },
         {
             "day": 13,
@@ -114,7 +116,7 @@
             "hoursWorked": 8,
             "activity": "Editing Do's and Don'ts for Fire Prevention",
             "isHoliday": false,
-            "category": "Media"
+            "category": "Design/Media"
         },
         {
             "day": 14,
@@ -134,7 +136,7 @@
             "hoursWorked": 10,
             "activity": "Video Shoot/Edit for Heat Index; Managing Inbound/Outbound Calls",
             "isHoliday": false,
-            "category": "Media/Admin"
+            "category": "Design/Media"
         },
         {
             "day": 16,
@@ -144,7 +146,7 @@
             "hoursWorked": 10,
             "activity": "Helped edit the Fire Prevention video",
             "isHoliday": false,
-            "category": "Media"
+            "category": "Design/Media"
         },
         {
             "day": 17,
@@ -154,7 +156,7 @@
             "hoursWorked": 10,
             "activity": "Did a shoot for Heat Index; Prepare Fire Drill Equipments",
             "isHoliday": false,
-            "category": "Media/Operations"
+            "category": "Design/Media"
         },
         {
             "day": 18,
@@ -174,7 +176,7 @@
             "hoursWorked": 8,
             "activity": "Editing the Fire Drill Video; Cloned and Setup the GUIDE Website in the laptop",
             "isHoliday": false,
-            "category": "Media/Development"
+            "category": "Development"
         },
         {
             "day": 20,
@@ -184,7 +186,7 @@
             "hoursWorked": 8,
             "activity": "Assigned to Project KLIMA; Planning on the development structure of KLIMA",
             "isHoliday": false,
-            "category": "Planning/Development"
+            "category": "Development"
         },
         {
             "day": 21,
@@ -244,7 +246,7 @@
             "hoursWorked": 10,
             "activity": "Development of KLIMA; Document Dispatch",
             "isHoliday": false,
-            "category": "Development/Admin"
+            "category": "Development"
         },
         {
             "day": 27,
@@ -284,7 +286,7 @@
             "hoursWorked": 10,
             "activity": "Revisions for the KLIMA UI; Document Dispatch",
             "isHoliday": false,
-            "category": "Development/Admin"
+            "category": "Development"
         },
         {
             "day": 31,
@@ -304,7 +306,7 @@
             "hoursWorked": 10,
             "activity": "Presented the Finalized UI of KLIMA",
             "isHoliday": false,
-            "category": "Development/Presentation"
+            "category": "QA/Collaboration"
         },
         {
             "day": 33,
@@ -334,7 +336,7 @@
             "hoursWorked": 10,
             "activity": "Implemented Snapshot feature in CCTV footage with SQLite backend; Document Dispatch",
             "isHoliday": false,
-            "category": "Development/Admin"
+            "category": "Development"
         },
         {
             "day": 36,
@@ -373,6 +375,46 @@
             "endTime": "07:00 PM",
             "hoursWorked": 10,
             "activity": "Duty Ongoing (RDANA Development)",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 36,
+            "date": "2026-04-27",
+            "startTime": "07:13 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 8,
+            "activity": "Setup Control Room, CCTV Dashboard UI Revision",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 37,
+            "date": "2026-04-28",
+            "startTime": "07:55 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 8,
+            "activity": "CCTV Dashboard UI Revision",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 38,
+            "date": "2026-04-29",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 8,
+            "activity": "Setup Control Room, CCTV Dashboard UI Revision",
+            "isHoliday": false,
+            "category": "Development"
+        },
+        {
+            "day": 39,
+            "date": "2026-04-30",
+            "startTime": "08:00 AM",
+            "endTime": "07:00 PM",
+            "hoursWorked": 8,
+            "activity": "CCTV Dashboard UI Revision",
             "isHoliday": false,
             "category": "Development"
         }

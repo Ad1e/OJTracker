@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import type { LogEntry } from "../hooks/useHoursCalc";
+import { getColorForCategory } from "./Charts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,13 +29,21 @@ function formatDate(iso: string): string {
     });
 }
 
+// FIX: The original function used a global regex (`/g` flag) and called
+// `regex.test(part)` inside `.map()`. A global regex tracks `lastIndex`
+// between calls, causing every-other match to fail. Fixed by using a
+// non-global regex for the test, keeping the global one only for `.split()`.
 function highlight(text: string, query: string): React.ReactNode {
     if (!query.trim()) return text;
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-    const parts = text.split(regex);
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    // Global regex for splitting (correct usage — split resets lastIndex)
+    const splitRegex = new RegExp(`(${escaped})`, "gi");
+    // Non-global regex for testing membership — no lastIndex mutation
+    const testRegex = new RegExp(`^${escaped}$`, "i");
+    const parts = text.split(splitRegex);
     return parts.map((part, i) =>
-        regex.test(part) ? (
-            <mark key={i} className="bg-indigo-100 text-indigo-800 rounded px-0.5">
+        testRegex.test(part) ? (
+            <mark key={i} className="bg-indigo-500/20 text-indigo-300 rounded px-0.5">
                 {part}
             </mark>
         ) : (
@@ -49,13 +58,13 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
     return (
         <span className={`ml-1 inline-flex flex-col gap-[1px] opacity-${active ? "100" : "30"}`}>
             <svg
-                className={`w-2.5 h-2.5 transition-colors ${active && dir === "asc" ? "text-indigo-600" : "text-slate-400"}`}
+                className={`w-2.5 h-2.5 transition-colors ${active && dir === "asc" ? "text-indigo-400" : "text-slate-400"}`}
                 viewBox="0 0 10 6" fill="currentColor"
             >
                 <path d="M5 0L10 6H0L5 0Z" />
             </svg>
             <svg
-                className={`w-2.5 h-2.5 transition-colors ${active && dir === "desc" ? "text-indigo-600" : "text-slate-400"}`}
+                className={`w-2.5 h-2.5 transition-colors ${active && dir === "desc" ? "text-indigo-400" : "text-slate-400"}`}
                 viewBox="0 0 10 6" fill="currentColor"
             >
                 <path d="M5 6L0 0H10L5 6Z" />
@@ -70,19 +79,24 @@ function EmptyState({ hasQuery }: { hasQuery: boolean }) {
     return (
         <tr>
             <td colSpan={5} className="py-16 text-center">
-                <div className="flex flex-col items-center gap-3 text-slate-400">
-                    <svg className="w-10 h-10 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
-                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-                        <rect x="9" y="3" width="6" height="4" rx="1" />
-                        <line x1="9" y1="12" x2="15" y2="12" />
-                        <line x1="9" y1="16" x2="13" y2="16" />
-                    </svg>
-                    <p className="text-sm font-medium">
-                        {hasQuery ? "No entries match your search." : "No log entries yet."}
-                    </p>
-                    {!hasQuery && (
-                        <p className="text-xs">Click <strong>Add Entry</strong> to get started.</p>
-                    )}
+                <div className="flex flex-col items-center gap-4 text-slate-400">
+                    {/* UI improvement: dashed border box around the clipboard icon */}
+                    <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-slate-700 flex items-center justify-center bg-slate-800/30">
+                        <svg className="w-9 h-9 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.2}>
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                            <rect x="9" y="3" width="6" height="4" rx="1" />
+                            <line x1="9" y1="12" x2="15" y2="12" />
+                            <line x1="9" y1="16" x2="13" y2="16" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-slate-300">
+                            {hasQuery ? "No entries match your search." : "No log entries yet."}
+                        </p>
+                        {!hasQuery && (
+                            <p className="text-xs text-slate-500 mt-1">Click <strong className="text-slate-400">Add Entry</strong> to get started.</p>
+                        )}
+                    </div>
                 </div>
             </td>
         </tr>
@@ -171,7 +185,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                     {query && (
                         <button
                             onClick={() => setQuery("")}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
                             aria-label="Clear search"
                         >
                             <svg className="w-3.5 h-3.5" viewBox="0 0 14 14" fill="currentColor">
@@ -243,11 +257,21 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                         {formatDate(entry.date)}
                                     </td>
 
-                                    {/* Activity */}
+                                    {/* Activity — UI improvement: category color dot prefix */}
                                     <td className={`${tdClass} max-w-xs`}>
-                                        <span className="line-clamp-2 leading-snug">
-                                            {highlight(entry.activity, query)}
-                                        </span>
+                                        <div className="flex items-start gap-2">
+                                            {/* Category color dot */}
+                                            {!entry.isHoliday && (
+                                                <span
+                                                    className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
+                                                    style={{ backgroundColor: getColorForCategory(entry.category) }}
+                                                    title={entry.category}
+                                                />
+                                            )}
+                                            <span className="line-clamp-2 leading-snug">
+                                                {highlight(entry.activity, query)}
+                                            </span>
+                                        </div>
                                     </td>
 
                                     {/* Hours */}
@@ -282,6 +306,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                             <button
                                                 onClick={() => onEdit(entry)}
                                                 title="Edit entry"
+                                                aria-label={`Edit entry for ${formatDate(entry.date)}`}
                                                 className="p-1.5 rounded border border-transparent hover:border-slate-600 bg-slate-800/0 hover:bg-slate-800/80 text-slate-400 hover:text-accent transition-all"
                                             >
                                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -292,6 +317,7 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                             <button
                                                 onClick={() => onDelete(entry.id)}
                                                 title="Delete entry"
+                                                aria-label={`Delete entry for ${formatDate(entry.date)}`}
                                                 className="p-1.5 rounded border border-transparent hover:border-red-900/50 bg-slate-800/0 hover:bg-red-900/20 text-slate-400 hover:text-red-400 transition-all"
                                             >
                                                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>

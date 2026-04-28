@@ -49,13 +49,24 @@ function MiniArc({ percent, accent }: MiniArcProps) {
     const circumference = 2 * Math.PI * r;
     const dashOffset = circumference - (percent / 100) * circumference;
 
+    // FIX: Reset to full circumference first, then animate to the target offset.
+    // This ensures re-animation fires even when `percent` changes to the same
+    // visual value but from a different render cycle.
     const [offset, setOffset] = React.useState(circumference);
-    
+    const prevDashOffset = React.useRef(circumference);
+
     React.useEffect(() => {
-        // Trigger animation after mount
-        const t = setTimeout(() => setOffset(dashOffset), 50);
+        // Reset to start position first to allow re-animation on prop change
+        setOffset(circumference);
+        prevDashOffset.current = circumference;
+
+        const t = setTimeout(() => {
+            setOffset(dashOffset);
+            prevDashOffset.current = dashOffset;
+        }, 50);
         return () => clearTimeout(t);
-    }, [dashOffset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dashOffset]); // re-runs whenever dashOffset (derived from percent) changes
 
     return (
         <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" className="drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
@@ -110,8 +121,16 @@ const IconTrendUp = () => (
 // ─── Single Card ──────────────────────────────────────────────────────────────
 
 function Card({ item }: { item: StatItem }) {
+    // UI Improvement: differentiate hover glow color by card type
+    const hoverGlowClass =
+        item.id === "rendered"
+            ? "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.08)]"
+            : item.id === "remaining"
+            ? "group-hover:shadow-[0_0_30px_rgba(251,191,36,0.08)]"
+            : "group-hover:shadow-[0_0_30px_rgba(99,102,241,0.08)]";
+
     return (
-        <div className="glass-card relative flex flex-col justify-between p-6 overflow-hidden group">
+        <div className={`glass-card relative flex flex-col justify-between p-6 overflow-hidden group ${hoverGlowClass}`}>
 
             {/* Subtle corner decoration */}
             <div

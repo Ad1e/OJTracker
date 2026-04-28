@@ -4,11 +4,15 @@ import { StatsCard } from "./components/StatsCard";
 import { TimeLogTable } from "./components/TimeLogTable";
 import { LogForm } from "./components/LogForm";
 import { Charts } from "./components/Charts";
+import { TraineeProfile, type TraineeProfileData } from "./components/traineeprofile";
+import { ProfileStrip, ProfileCard } from "./components/profilecard";
+import BsuLogoImg from "./assets/bsu-logo.png";
 import seedData from "./data/journalData.json";
 
 // ─── Seed data cast ───────────────────────────────────────────────────────────
 
 const rawEntries = (seedData as any).entries || [];
+const journalConfig = (seedData as any).config || {};
 const seed: LogEntry[] = rawEntries.map((e: any) => ({
   ...e,
   id: `log-${e.day}`,
@@ -24,6 +28,20 @@ function genId(): string {
 
 export default function App() {
   const [logs, setLogs] = useState<LogEntry[]>(seed);
+
+  // Profile state — persisted to localStorage
+  const [profile, setProfile] = useState<TraineeProfileData | null>(() => {
+    const saved = localStorage.getItem("practilog_profile");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [showProfileSetup, setShowProfileSetup] = useState(!profile);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -84,6 +102,12 @@ export default function App() {
     }
   }, [showToast]);
 
+  const handleProfileSave = useCallback((data: TraineeProfileData) => {
+    setProfile(data);
+    setShowProfileSetup(false);
+    localStorage.setItem("practilog_profile", JSON.stringify(data));
+  }, []);
+
   // ── Derived ────────────────────────────────────────────────────────────────
   const progressWidth = `${Math.min(100, stats.percentComplete)}%`;
 
@@ -91,23 +115,19 @@ export default function App() {
     <div className="min-h-screen bg-background text-slate-300 font-sans selection:bg-accent/30">
 
       {/* ── Topbar ──────────────────────────────────────────────────────── */}
-      <header className="glass-card sticky top-0 z-30 border-b-0 rounded-none rounded-b-2xl mb-8 mx-4 sm:mx-6 mt-2 max-w-6xl xl:mx-auto">
-        <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <header className="glass-card sticky top-0 z-30 border-b border-slate-800 rounded-none rounded-b-2xl mb-8 mx-4 sm:mx-6 mt-2 max-w-6xl xl:mx-auto py-3">
+        <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            {/* Logo mark */}
-            <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-              <svg className="w-5 h-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
+            {/* BSU Logo */}
+            <img src={BsuLogoImg} alt="BSU" className="w-10 h-10 object-contain" />
             <div>
-              <h1 className="text-lg font-display text-white tracking-tight leading-none">InternTrack</h1>
-              <p className="text-xs text-slate-400 mt-1 font-medium tracking-wide">500-HOUR JOURNAL</p>
+              <h1 className="text-lg font-display text-white tracking-tight leading-none">PractiLog</h1>
+              <p className="text-xs text-slate-400 mt-1 font-medium tracking-wide">BSU · 500-HOUR JOURNAL</p>
             </div>
           </div>
+
+          {/* Profile strip in header */}
+          {profile && <ProfileStrip profile={profile} onEdit={() => setShowProfileSetup(true)} />}
 
           {/* Header progress pill */}
           <div className="hidden sm:flex items-center gap-3 flex-1 max-w-xs ml-4">
@@ -149,6 +169,12 @@ export default function App() {
               </p>
             </div>
           </div>
+        )}
+
+        {profile && (
+          <section className="mb-8">
+            <ProfileCard profile={profile} onEdit={() => setShowProfileSetup(true)} stats={stats} />
+          </section>
         )}
 
         {/* ── Stats grid ──────────────────────────────────────────────── */}
@@ -230,9 +256,26 @@ export default function App() {
         </section>
       </main>
 
+      {/* ── Profile Setup Modal ─────────────────────────────────────────── */}
+      {showProfileSetup && (
+        <TraineeProfile
+          onSave={handleProfileSave}
+          onCancel={profile ? () => setShowProfileSetup(false) : undefined}
+          canCancel={!!profile}
+          initial={{
+            name: journalConfig.internName,
+            department: journalConfig.department,
+            supervisor: journalConfig.supervisor,
+            school: journalConfig.school,
+            totalRequiredHours: journalConfig.totalRequiredHours,
+            startDate: journalConfig.startDate,
+          }}
+        />
+      )}
+
       {/* ── Footer ──────────────────────────────────────────────────────── */}
       <footer className="text-center py-10 text-xs text-slate-600 font-medium border-t border-slate-800/50 mt-10">
-        InternTrack &middot; {new Date().getFullYear()} &middot; Built with React + TypeScript
+        PractiLog &middot; {new Date().getFullYear()} &middot; Built with React + TypeScript
       </footer>
 
       {/* ── Modal ───────────────────────────────────────────────────────── */}

@@ -95,7 +95,9 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
     const [submitted, setSubmitted] = useState(false);
     const firstInputRef = useRef<HTMLInputElement>(null);
 
-    // Populate form when editing
+    // FIX: Added `initial?.id` to dependency array so the effect re-fires when
+    // opening the modal for a DIFFERENT entry (even if mode and isOpen don't change).
+    // This prevents the flash-of-previous-data bug when switching between entries.
     useEffect(() => {
         if (isOpen) {
             if (mode === "edit" && initial) {
@@ -115,7 +117,8 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
             setSubmitted(false);
             setTimeout(() => firstInputRef.current?.focus(), 80);
         }
-    }, [isOpen, mode, initial]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, mode, initial, initial?.id]); // FIX: include initial?.id
 
     // Re-validate on change once the user has tried to submit
     useEffect(() => {
@@ -171,6 +174,7 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
             onClick={handleBackdrop}
             role="dialog"
             aria-modal="true"
+            aria-label={mode === "add" ? "Add log entry dialog" : "Edit log entry dialog"}
         >
             <div className="w-full max-w-lg glass-card overflow-hidden animate-slide-up bg-surface">
 
@@ -187,7 +191,7 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
                     <button
                         onClick={onClose}
                         className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
-                        aria-label="Close"
+                        aria-label="Close dialog"
                     >
                         <svg className="w-4 h-4" viewBox="0 0 14 14" fill="currentColor">
                             <path d="M8.414 7l3.293-3.293a1 1 0 00-1.414-1.414L7 5.586 3.707 2.293A1 1 0 002.293 3.707L5.586 7 2.293 10.293a1 1 0 101.414 1.414L7 8.414l3.293 3.293a1 1 0 001.414-1.414L8.414 7z" />
@@ -219,10 +223,12 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
                             >
                                 <option value="Development">Development</option>
                                 <option value="Design/Media">Design/Media</option>
-                                <option value="Operations">Operations</option>
-                                <option value="Admin">Admin</option>
+                                <option value="QA/Collaboration">QA/Collaboration</option>
                                 <option value="Training">Training</option>
-                                <option value="Other">Other</option>
+                                <option value="Documentation">Documentation</option>
+                                <option value="Events">Events</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Operations">Operations</option>
                             </select>
                         </Field>
                     </div>

@@ -30,3 +30,19 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/* Explicit slide-up animation — also referenced via tailwind config keyframes */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
