@@ -2,16 +2,10 @@ import { useMemo } from "react";
 import {
     LineChart,
     Line,
-    BarChart,
-    Bar,
-    PieChart,
-    Pie,
-    Cell,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
-    Legend,
     ResponsiveContainer,
 } from "recharts";
 import type { LogEntry } from "../hooks/useHoursCalc";
@@ -125,137 +119,12 @@ function HoursTrendChart({ logs }: ChartsProps) {
     );
 }
 
-// ─── Category Breakdown Chart ──────────────────────────────────────────────────
-
-function CategoryBreakdownChart({ logs }: ChartsProps) {
-    const data = useMemo(() => {
-        const categoryMap: Record<string, number> = {};
-        logs.forEach((entry) => {
-            if (!entry.isHoliday) {
-                categoryMap[entry.category] =
-                    (categoryMap[entry.category] || 0) + entry.hoursWorked;
-            }
-        });
-
-        return Object.entries(categoryMap)
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value);
-    }, [logs]);
-
-    if (data.length === 0) return null;
-
-    return (
-        <div className="glass-card p-6">
-            <h3 className="text-base font-display font-semibold text-white mb-4">
-                🎯 Hours by Category
-            </h3>
-            {/* FIX: Removed inline `label` prop from <Pie> — it overflows on small screens.
-                Using <Legend> instead for better responsiveness. */}
-            <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                    <Pie
-                        data={data}
-                        cx="50%"
-                        cy="45%"
-                        labelLine={false}
-                        outerRadius={90}
-                        fill="#8884d8"
-                        dataKey="value"
-                    >
-                        {data.map((entry, index) => (
-                            <Cell
-                                key={`cell-${index}`}
-                                fill={getColorForCategory(entry.name)}
-                            />
-                        ))}
-                    </Pie>
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "#1e293b",
-                            border: "1px solid rgba(71, 85, 105, 0.5)",
-                            borderRadius: "8px",
-                            color: "#e2e8f0",
-                        }}
-                        formatter={(value: number) => [`${value.toFixed(1)}h`, "Hours"]}
-                    />
-                    <Legend
-                        wrapperStyle={{ fontSize: "11px", color: "#94a3b8", paddingTop: "8px" }}
-                        formatter={(value) => (
-                            <span style={{ color: "#94a3b8" }}>{value}</span>
-                        )}
-                    />
-                </PieChart>
-            </ResponsiveContainer>
-        </div>
-    );
-}
-
-// ─── Daily Distribution Chart ──────────────────────────────────────────────────
-
-function DailyDistributionChart({ logs }: ChartsProps) {
-    const data = useMemo(() => {
-        const dailyMap: Record<string, number> = {};
-        logs.forEach((entry) => {
-            if (!entry.isHoliday) {
-                const dateStr = new Date(entry.date).toLocaleDateString(
-                    "en-US",
-                    { month: "short", day: "numeric" }
-                );
-                dailyMap[dateStr] = (dailyMap[dateStr] || 0) + entry.hoursWorked;
-            }
-        });
-
-        return Object.entries(dailyMap)
-            .map(([date, hours]) => ({ date, hours }))
-            .slice(-15); // Last 15 days
-    }, [logs]);
-
-    if (data.length === 0) return null;
-
-    return (
-        <div className="glass-card p-6">
-            <h3 className="text-base font-display font-semibold text-white mb-4">
-                📊 Last 15 Days Distribution
-            </h3>
-            <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(71, 85, 105, 0.3)" />
-                    <XAxis
-                        dataKey="date"
-                        stroke="#94a3b8"
-                        style={{ fontSize: "11px" }}
-                    />
-                    <YAxis stroke="#94a3b8" style={{ fontSize: "12px" }} />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "#1e293b",
-                            border: "1px solid rgba(71, 85, 105, 0.5)",
-                            borderRadius: "8px",
-                            color: "#e2e8f0",
-                        }}
-                        formatter={(value: number) => [`${value.toFixed(1)}h`, "Hours"]}
-                    />
-                    <Bar
-                        dataKey="hours"
-                        fill="#6366f1"
-                        radius={[8, 8, 0, 0]}
-                    />
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
-    );
-}
-
 // ─── Main Charts Component ────────────────────────────────────────────────────
 
 export function Charts({ logs }: ChartsProps) {
     return (
         <div className="space-y-6">
             <HoursTrendChart logs={logs} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <CategoryBreakdownChart logs={logs} />
-                <DailyDistributionChart logs={logs} />
-            </div>
         </div>
     );
 }
