@@ -31,13 +31,52 @@ function today(): string {
     return new Date().toISOString().split("T")[0];
 }
 
+/**
+ * Parse time string in 12-hour format (e.g., "08:00 AM", "05:30 PM") and return minutes since midnight.
+ * Returns null if format is invalid.
+ */
+function parseTime(timeStr: string): number | null {
+    const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!match) return null;
+
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const meridiem = match[3].toUpperCase();
+
+    if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return null;
+
+    if (meridiem === "PM" && hours !== 12) hours += 12;
+    if (meridiem === "AM" && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+}
+
+/**
+ * Calculate hours worked between two times, minus 1 hour for break.
+ * Returns a string rounded to 1 decimal place, or "0" if calculation fails.
+ */
+function calculateHours(startTime: string, endTime: string): string {
+    const startMinutes = parseTime(startTime);
+    const endMinutes = parseTime(endTime);
+
+    if (startMinutes === null || endMinutes === null) return "0";
+
+    let diff = endMinutes - startMinutes;
+
+    // Handle overnight shifts (e.g., 10 PM to 6 AM)
+    if (diff < 0) diff += 24 * 60;
+
+    const hours = diff / 60 - 1; // Subtract 1 hour for break
+    return Math.max(0, hours).toFixed(1); // Ensure non-negative
+}
+
 const EMPTY: FormData = {
     date: today(),
     startTime: "08:00 AM",
     endTime: "05:00 PM",
     category: "Development",
     activity: "",
-    hoursWorked: "8",
+    hoursWorked: "9",
     isHoliday: false,
 };
 
@@ -119,6 +158,14 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, mode, initial, initial?.id]); // FIX: include initial?.id
+
+    // Auto-calculate hours from start/end times when they change
+    useEffect(() => {
+        if (!form.isHoliday) {
+            const calculated = calculateHours(form.startTime, form.endTime);
+            setForm((prev) => ({ ...prev, hoursWorked: calculated }));
+        }
+    }, [form.startTime, form.endTime]);
 
     // Re-validate on change once the user has tried to submit
     useEffect(() => {
@@ -273,6 +320,7 @@ export function LogForm({ isOpen, mode, initial, onSubmit, onClose }: LogFormPro
                                     min={0}
                                     max={24}
                                     step={0.5}
+                                    readOnly
                                     disabled={form.isHoliday}
                                     onChange={(e) => set("hoursWorked", e.target.value)}
                                     className={`${errors.hoursWorked ? inputErrorClass : inputClass} disabled:opacity-40 disabled:cursor-not-allowed`}

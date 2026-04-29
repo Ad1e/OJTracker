@@ -379,7 +379,7 @@
             "category": "Development"
         },
         {
-            "day": 36,
+            "day": 40,
             "date": "2026-04-27",
             "startTime": "07:13 AM",
             "endTime": "07:00 PM",
@@ -389,7 +389,7 @@
             "category": "Development"
         },
         {
-            "day": 37,
+            "day": 41,
             "date": "2026-04-28",
             "startTime": "07:55 AM",
             "endTime": "07:00 PM",
@@ -399,17 +399,17 @@
             "category": "Development"
         },
         {
-            "day": 38,
+            "day": 42,
             "date": "2026-04-29",
-            "startTime": "08:00 AM",
-            "endTime": "07:00 PM",
-            "hoursWorked": 8,
+            "startTime": "09:00 AM",
+            "endTime": "05:00 PM",
+            "hoursWorked": 7,
             "activity": "Setup Control Room, CCTV Dashboard UI Revision",
             "isHoliday": false,
             "category": "Development"
         },
         {
-            "day": 39,
+            "day": 43,
             "date": "2026-04-30",
             "startTime": "08:00 AM",
             "endTime": "07:00 PM",

@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useHoursCalc, type LogEntry } from "./hooks/useHoursCalc";
+import { addEntry, updateEntry, deleteEntry } from "./hooks/api";
 import { StatsCard } from "./components/StatsCard";
 import { TimeLogTable } from "./components/TimeLogTable";
 import { LogForm } from "./components/LogForm";
@@ -77,22 +78,31 @@ export default function App() {
   }, []);
 
   const handleSubmit = useCallback(
-    (data: Omit<LogEntry, "id" | "day"> & { id?: string; day?: number }) => {
+    async (data: Omit<LogEntry, "id" | "day"> & { id?: string; day?: number }) => {
       if (data.id) {
-        // Update existing
-        setLogs((prev) =>
-          prev.map((l) => (l.id === data.id ? { ...l, ...data, id: l.id, day: l.day } : l))
-        );
-        showToast("Entry updated successfully", "edit");
+        // Update existing entry
+        const result = await updateEntry(data.id, data);
+        if (result) {
+          setLogs((prev) =>
+            prev.map((l) => (l.id === data.id ? { ...result, id: `log-${result.day}` } : l))
+          );
+          showToast("Entry updated successfully", "edit");
+        } else {
+          showToast("Failed to update entry", "delete");
+        }
       } else {
-        // Append new
-        // Auto-assign a day based on array length or max day for now (as demonstration)
-        const nextDay = logs.length > 0 ? Math.max(...logs.map(l => l.day || 0)) + 1 : 1;
-        setLogs((prev) => [...prev, { ...data, id: genId(), day: nextDay }]);
-        showToast("New entry added", "success");
+        // Add new entry
+        const result = await addEntry(data as Omit<LogEntry, "id">);
+        if (result) {
+          const newEntry: LogEntry = { ...result, id: `log-${result.day}` };
+          setLogs((prev) => [...prev, newEntry]);
+          showToast("New entry added", "success");
+        } else {
+          showToast("Failed to add entry", "delete");
+        }
       }
     },
-    [logs, showToast]
+    [showToast]
   );
 
   const handleDelete = useCallback((id: string) => {
