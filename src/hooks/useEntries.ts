@@ -17,7 +17,6 @@ function toLogEntry(row: Record<string, any>): LogEntry {
     hoursWorked: Number(row.hours_worked),
     activity: row.activity as string,
     isHoliday: Boolean(row.is_holiday),
-    createdAt: row.created_at as string | undefined,
   };
 }
 
