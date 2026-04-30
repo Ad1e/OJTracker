@@ -11,7 +11,6 @@ export interface LogEntry {
     hoursWorked: number;   // 0–24
     activity: string;
     isHoliday: boolean;
-    category: string;
 }
 
 export interface HoursCalcResult {
@@ -41,6 +40,43 @@ const HOURS_PER_WORKDAY = 8 as const;
 const MS_PER_DAY = 1_000 * 60 * 60 * 24;
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
+
+/**
+ * Checks if a date string (YYYY-MM-DD format) falls on a weekend.
+ */
+function isWeekend(dateString: string): boolean {
+    const date = new Date(dateString);
+    const dow = date.getDay(); // 0 = Sunday, 6 = Saturday
+    return dow === 0 || dow === 6;
+}
+
+/**
+ * Utility: safely parse a local "YYYY-MM-DD" string into a Date object
+ * preventing timezone shifts.
+ */
+export function parseLocalDate(dateString: string): Date {
+    const [y, m, d] = dateString.split("-").map(Number);
+    return new Date(y, m - 1, d);
+}
+
+/**
+ * Utility: Calculate hours worked, assuming a 1-hour break if duration >= 5 hours.
+ */
+export function calcHoursWorked(startTime: string, endTime: string): number {
+    const [startH, startM] = startTime.split(":").map(Number);
+    const [endH, endM] = endTime.split(":").map(Number);
+
+    const start = startH + startM / 60;
+    const end = endH + endM / 60;
+
+    let diff = end - start;
+    if (diff <= 0) return 0;
+    
+    // Auto-deduct 1 hour break for 5+ hours shift, but cap minimum at 4 hours if so
+    if (diff >= 5) diff -= 1;
+    
+    return parseFloat(diff.toFixed(1));
+}
 
 /**
  * Returns a locale date string offset by `days` calendar days from today.
@@ -83,9 +119,11 @@ export function useHoursCalc(
         let holidayCount = 0;
 
         for (const entry of logs) {
-            if (entry.isHoliday) {
-                holidayCount++;
-                // Holidays are skipped — they do NOT reduce the 500-hour target,
+            if (entry.isHoliday || isWeekend(entry.date)) {
+                if (entry.isHoliday) {
+                    holidayCount++;
+                }
+                // Holidays and weekends are skipped — they do NOT reduce the 500-hour target,
                 // they simply don't contribute hours.
                 continue;
             }
@@ -135,4 +173,4 @@ export function useHoursCalc(
             avgHoursPerDay,
         };
     }, [logs, target]);
-}
+}

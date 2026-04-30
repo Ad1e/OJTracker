@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
 import type { LogEntry } from "../hooks/useHoursCalc";
-import { getColorForCategory } from "./Charts";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -257,17 +256,9 @@ export function TimeLogTable({ logs, onEdit, onDelete }: TimeLogTableProps) {
                                         {formatDate(entry.date)}
                                     </td>
 
-                                    {/* Activity — UI improvement: category color dot prefix */}
+                                    {/* Activity */}
                                     <td className={`${tdClass} max-w-xs`}>
                                         <div className="flex items-start gap-2">
-                                            {/* Category color dot */}
-                                            {!entry.isHoliday && (
-                                                <span
-                                                    className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5"
-                                                    style={{ backgroundColor: getColorForCategory(entry.category) }}
-                                                    title={entry.category}
-                                                />
-                                            )}
                                             <span className="line-clamp-2 leading-snug">
                                                 {highlight(entry.activity, query)}
                                             </span>
