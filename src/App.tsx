@@ -6,12 +6,14 @@ import { StatsCard } from "./components/StatsCard";
 import { TimeLogTable } from "./components/TimeLogTable";
 import { LogForm } from "./components/LogForm";
 import { Charts } from "./components/Charts";
+import { HoursSummary } from "./components/HoursSummary";
 import { TraineeProfile, type TraineeProfileData } from "./components/traineeprofile";
 import { ProfileStrip } from "./components/profilecard";
 import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
 import { Auth } from "./components/Auth";
 import { supabase } from "./lib/supabase";
 import BsuLogoImg from "./assets/bsu-logo.png";
+import journalData from "./data/journalData.json";
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 
@@ -75,6 +77,9 @@ export default function App() {
     setToast({ id, message, type });
     setTimeout(() => setToast((cur) => (cur?.id === id ? null : cur)), 3000);
   }, []);
+
+  // ── Active tab ────────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<"dashboard" | "summary">("dashboard");
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const TARGET = profile?.totalRequiredHours ?? 500;
@@ -213,80 +218,116 @@ export default function App() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pb-12 space-y-10">
 
-        {/* Completion banner */}
-        {stats.percentComplete >= 100 && (
-          <div className="glass-card !bg-emerald-900/20 !border-emerald-500/30 px-6 py-5 flex items-center gap-4">
-            <span className="text-2xl">🎉</span>
-            <div>
-              <p className="font-display font-semibold text-lg text-emerald-300">Internship complete!</p>
-              <p className="text-sm text-emerald-400/80 mt-0.5">
-                You've logged all {TARGET} required hours. Congratulations!
-              </p>
-            </div>
-          </div>
+        {/* ── Tab navigation ───────────────────────────────────────────── */}
+        <div className="flex gap-1.5 p-1 bg-slate-800/60 rounded-xl border border-slate-700/50 w-fit">
+          {([
+            { id: "dashboard", label: "Dashboard", icon: "📈" },
+            { id: "summary",   label: "Hours Summary", icon: "📊" },
+          ] as const).map((tab) => (
+            <button
+              key={tab.id}
+              id={`tab-${tab.id}`}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === tab.id
+                  ? "bg-accent text-white shadow-[0_0_12px_rgba(99,102,241,0.35)]"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+              }`}
+            >
+              <span>{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Dashboard tab ────────────────────────────────────────────── */}
+        {activeTab === "dashboard" && (
+          <>
+            {/* Completion banner */}
+            {stats.percentComplete >= 100 && (
+              <div className="glass-card !bg-emerald-900/20 !border-emerald-500/30 px-6 py-5 flex items-center gap-4">
+                <span className="text-2xl">🎉</span>
+                <div>
+                  <p className="font-display font-semibold text-lg text-emerald-300">Internship complete!</p>
+                  <p className="text-sm text-emerald-400/80 mt-0.5">
+                    You've logged all {TARGET} required hours. Congratulations!
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Stats */}
+            <section>
+              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-5 ml-1">Overview</h2>
+              <StatsCard stats={stats} target={TARGET} />
+            </section>
+
+            {/* Master progress bar */}
+            <section className="glass-card px-7 py-6 hover:!translate-y-0">
+              <div className="flex items-end justify-between mb-5">
+                <div>
+                  <h3 className="text-base font-display text-white">Total Progress</h3>
+                  <p className="text-sm text-slate-400 mt-1 tabular-nums">
+                    {stats.remaining > 0 ? `${stats.remaining.toFixed(1)} hours remaining` : "All hours completed!"}
+                  </p>
+                </div>
+                <span className="text-4xl font-display font-bold text-accent tabular-nums drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
+                  {stats.percentComplete}%
+                </span>
+              </div>
+
+              <div className="relative h-4 bg-slate-800/80 rounded-full overflow-hidden shadow-inner border border-slate-700/50">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-indigo-600 to-accent transition-all duration-1000 ease-out"
+                  style={{ width: progressWidth }}
+                >
+                  <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white/30 to-transparent" />
+                </div>
+                {[25, 50, 75].map((pct) => (
+                  <div key={pct} className="absolute inset-y-0 w-px bg-slate-700" style={{ left: `${pct}%` }} />
+                ))}
+              </div>
+
+              <div className="flex justify-between text-[11px] text-slate-500 font-medium mt-3 px-1">
+                <span>0 h</span>
+                <span>{TARGET * 0.25} h</span>
+                <span>{TARGET * 0.5} h</span>
+                <span>{TARGET * 0.75} h</span>
+                <span>{TARGET} h</span>
+              </div>
+            </section>
+
+            {/* Analytics */}
+            <section>
+              <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-5 ml-1">Analytics</h2>
+              <Charts logs={logs} />
+            </section>
+
+            {/* Log table */}
+            <section>
+              <div className="flex items-center justify-between mb-5 ml-1">
+                <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Activity Log</h2>
+                <span className="text-xs text-slate-400 font-medium bg-surface px-2.5 py-1 rounded-full border border-slate-700/50">
+                  {logs.length} total entr{logs.length !== 1 ? "ies" : "y"}
+                </span>
+              </div>
+              <TimeLogTable
+                logs={logs}
+                onEdit={openEdit}
+                onDelete={(id) => setDeleteTarget(logs.find((l) => l.id === id) || null)}
+              />
+            </section>
+          </>
         )}
 
-        {/* Stats */}
-        <section>
-          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-5 ml-1">Overview</h2>
-          <StatsCard stats={stats} target={TARGET} />
-        </section>
-
-        {/* Master progress bar */}
-        <section className="glass-card px-7 py-6 hover:!translate-y-0">
-          <div className="flex items-end justify-between mb-5">
-            <div>
-              <h3 className="text-base font-display text-white">Total Progress</h3>
-              <p className="text-sm text-slate-400 mt-1 tabular-nums">
-                {stats.remaining > 0 ? `${stats.remaining.toFixed(1)} hours remaining` : "All hours completed!"}
-              </p>
-            </div>
-            <span className="text-4xl font-display font-bold text-accent tabular-nums drop-shadow-[0_0_10px_rgba(99,102,241,0.5)]">
-              {stats.percentComplete}%
-            </span>
-          </div>
-
-          <div className="relative h-4 bg-slate-800/80 rounded-full overflow-hidden shadow-inner border border-slate-700/50">
-            <div
-              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-indigo-600 to-accent transition-all duration-1000 ease-out"
-              style={{ width: progressWidth }}
-            >
-              <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white/30 to-transparent" />
-            </div>
-            {[25, 50, 75].map((pct) => (
-              <div key={pct} className="absolute inset-y-0 w-px bg-slate-700" style={{ left: `${pct}%` }} />
-            ))}
-          </div>
-
-          <div className="flex justify-between text-[11px] text-slate-500 font-medium mt-3 px-1">
-            <span>0 h</span>
-            <span>{TARGET * 0.25} h</span>
-            <span>{TARGET * 0.5} h</span>
-            <span>{TARGET * 0.75} h</span>
-            <span>{TARGET} h</span>
-          </div>
-        </section>
-
-        {/* Analytics */}
-        <section>
-          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-5 ml-1">Analytics</h2>
-          <Charts logs={logs} />
-        </section>
-
-        {/* Log table */}
-        <section>
-          <div className="flex items-center justify-between mb-5 ml-1">
-            <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Activity Log</h2>
-            <span className="text-xs text-slate-400 font-medium bg-surface px-2.5 py-1 rounded-full border border-slate-700/50">
-              {logs.length} total entr{logs.length !== 1 ? "ies" : "y"}
-            </span>
-          </div>
-          <TimeLogTable
-            logs={logs}
-            onEdit={openEdit}
-            onDelete={(id) => setDeleteTarget(logs.find((l) => l.id === id) || null)}
+        {/* ── Hours Summary tab ─────────────────────────────────────────── */}
+        {activeTab === "summary" && (
+          <HoursSummary
+            weeks={journalData.weeks as Parameters<typeof HoursSummary>[0]["weeks"]}
+            targetHours={TARGET}
           />
-        </section>
+        )}
+
       </main>
 
       {/* Profile Setup Modal */}

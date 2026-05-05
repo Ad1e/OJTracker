@@ -43,15 +43,18 @@ export function useEntries(): UseEntriesReturn {
 
     if (!supabase) {
       console.warn("[useEntries] Supabase not configured. Using fallback data.");
-      const mockEntries = fallbackData.entries.map((e, index) => ({
+      // Flatten the new week-based JSON structure: weeks[].days[]
+      const allDays = (fallbackData.weeks ?? []).flatMap((week) => week.days ?? []);
+      const mockEntries = allDays.map((e, index) => ({
         id: `mock-${index + 1}`,
         day: e.day,
         date: e.date,
         startTime: e.startTime,
         endTime: e.endTime,
         hoursWorked: e.hoursWorked,
-        activity: e.activity,
-        isHoliday: e.isHoliday,
+        // Join the activities array into a single string for backward compatibility
+        activity: Array.isArray(e.activities) ? e.activities.join("; ") : "",
+        isHoliday: false,
         createdAt: new Date().toISOString(),
       }));
 
