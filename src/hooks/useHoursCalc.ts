@@ -88,8 +88,8 @@ function addWorkdays(startDate: Date, workdays: number): Date {
 
     while (added < workdays) {
         result.setTime(result.getTime() + MS_PER_DAY);
-        const dow = result.getDay(); // 0 = Sunday, 6 = Saturday
-        if (dow !== 0 && dow !== 6) {
+        const dow = result.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
+        if (dow !== 0 && dow !== 5 && dow !== 6) {
             added++;
         }
     }

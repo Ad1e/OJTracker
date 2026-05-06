@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-
+import journalData from "../data/journalData.json";
 export interface TraineeProfileData {
     name: string;
     department: string;
@@ -190,9 +190,9 @@ export function TraineeProfile({ onSave, initial, onCancel, canCancel = true }: 
     const [step, setStep] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [form, setForm] = useState<TraineeProfileData>({
-        name: initial?.name ?? "Mazan, Aldwin C.",
-        department: initial?.department ?? "CICS-IT-4202",
-        supervisor: initial?.supervisor ?? "Engr. Rodrigo Rodolfo A. Irineo Jr.",
+        name: initial?.name ?? journalData.trainee,
+        department: initial?.department ?? journalData.course,
+        supervisor: initial?.supervisor ?? journalData.supervisor,
         school: initial?.school ?? "Batangas State University",
         totalRequiredHours: initial?.totalRequiredHours ?? 500,
         avatarDataUrl: initial?.avatarDataUrl ?? null,
@@ -202,9 +202,9 @@ export function TraineeProfile({ onSave, initial, onCancel, canCancel = true }: 
 
     useEffect(() => {
         setForm({
-            name: initial?.name ?? "Mazan, Aldwin C.",
-            department: initial?.department ?? "CICS-IT-4202",
-            supervisor: initial?.supervisor ?? "Engr. Rodrigo Rodolfo A. Irineo Jr.",
+            name: initial?.name ?? journalData.trainee,
+            department: initial?.department ?? journalData.course,
+            supervisor: initial?.supervisor ?? journalData.supervisor,
             school: initial?.school ?? "Batangas State University",
             totalRequiredHours: initial?.totalRequiredHours ?? 500,
             avatarDataUrl: initial?.avatarDataUrl ?? null,
@@ -292,7 +292,7 @@ export function TraineeProfile({ onSave, initial, onCancel, canCancel = true }: 
                             <input
                                 type="text"
                                 value={form.name}
-                                placeholder="Mazan, Aldwin C."
+                                placeholder={journalData.trainee}
                                 onChange={(e) => set("name", e.target.value)}
                                 className={submitted && errors.name ? inputErrorClass : inputClass}
                                 autoFocus
@@ -303,7 +303,7 @@ export function TraineeProfile({ onSave, initial, onCancel, canCancel = true }: 
                             <input
                                 type="text"
                                 value={form.department}
-                                placeholder="CICS-IT-4202"
+                                placeholder={journalData.course}
                                 onChange={(e) => set("department", e.target.value)}
                                 className={submitted && errors.department ? inputErrorClass : inputClass}
                             />
@@ -341,7 +341,7 @@ export function TraineeProfile({ onSave, initial, onCancel, canCancel = true }: 
                             <input
                                 type="text"
                                 value={form.supervisor}
-                                placeholder="Engr. Rodrigo Rodolfo A. Irineo Jr."
+                                placeholder={journalData.supervisor}
                                 onChange={(e) => set("supervisor", e.target.value)}
                                 className={submitted && errors.supervisor ? inputErrorClass : inputClass}
                                 autoFocus

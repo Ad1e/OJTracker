@@ -1,623 +1,578 @@
 {
-    "trainee": "Mazan, Aldwin C.",
-    "course": "CICS - IT-4202",
+    "trainee": "Aldwin C. Mazan",
+    "course": "CICS-IT-4202",
     "supervisor": "Engr. Rodrigo Rodolfo A. Irineo Jr.",
     "weeks": [
-        {
-            "week": 1,
-            "period": "February 19-20, 2026",
-            "days": [
-                {
-                    "day": 1,
-                    "date": "2026-02-19",
-                    "startTime": "07:05 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Created a T-Shirt Design for Fire Prevention Month",
-                        "Did a shoot for Do's and Don'ts for Fire Prevention Month"
-                    ]
-                },
-                {
-                    "day": 2,
-                    "date": "2026-02-20",
-                    "startTime": "06:38 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Attended a Fire Safety Training for Fire Drill"
-                    ]
-                }
-            ],
-            "totalHours": 16
-        },
-        {
-            "week": 2,
-            "period": "February 23-27, 2026",
-            "days": [
-                {
-                    "day": 3,
-                    "date": "2026-02-23",
-                    "startTime": "07:47 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Shoot for Fire Prevention Month",
-                        "Attended the DPWH Job Fair"
-                    ]
-                },
-                {
-                    "day": 4,
-                    "date": "2026-02-24",
-                    "startTime": "07:10 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Collaborated with Team GADC, completed a QA review and presented it to Sir Rod and Sir Erwin on findings and identified improvements"
-                    ]
-                },
-                {
-                    "day": 5,
-                    "date": "2026-02-25",
-                    "startTime": "07:50 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Reviewed the documentation for the GUIDE Website",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 6,
-                    "date": "2026-02-26",
-                    "startTime": "07:47 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Video Editing for Fire Prevention Month Video",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 7,
-                    "date": "2026-02-27",
-                    "startTime": "07:00 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Cloned the repository then started a quick code review",
-                        "For the new mock design of GUIDE Web that replaced the 'MAIN' codebase"
-                    ]
-                }
-            ],
-            "totalHours": 40
-        },
-        {
-            "week": 3,
-            "period": "March 2-6, 2026",
-            "days": [
-                {
-                    "day": 8,
-                    "date": "2026-03-02",
-                    "startTime": "05:50 AM",
-                    "endTime": "04:39 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Setup Equipments for NSFD",
-                        "Participated for the rehearsal of NSFD",
-                        "Managing Inbound/Outbound Calls"
-                    ]
-                },
-                {
-                    "day": 9,
-                    "date": "2026-03-03",
-                    "startTime": "07:37 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Fire Prevention Video Edit"
-                    ]
-                },
-                {
-                    "day": 10,
-                    "date": "2026-03-04",
-                    "startTime": "07:36 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Did a shoot for Heat Index",
-                        "Prepare Fire Drill Equipments"
-                    ]
-                },
-                {
-                    "day": 11,
-                    "date": "2026-03-05",
-                    "startTime": "08:04 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 7.93,
-                    "hoursWorkedLabel": "7 Hours, 56 Minutes",
-                    "activities": [
-                        "Document Dispatch",
-                        "Setup Control Room"
-                    ]
-                },
-                {
-                    "day": 12,
-                    "date": "2026-03-06",
-                    "startTime": "07:39 AM",
-                    "endTime": "05:00 PM",
-                    "hoursWorked": 8,
-                    "hoursWorkedLabel": "8 Hours",
-                    "activities": [
-                        "Video Edit for Do's and Don'ts for Fire Prevention Month",
-                        "Participated in Fire Olympics Training"
-                    ]
-                }
-            ],
-            "totalHours": 39.93
-        },
-        {
-            "week": 4,
-            "period": "March 9-12, 2026",
-            "days": [
-                {
-                    "day": 13,
-                    "date": "2026-03-09",
-                    "startTime": "07:10 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.83,
-                    "hoursWorkedLabel": "9 Hours, 50 Minutes",
-                    "activities": [
-                        "Video Shoot/Edit for Heat Index",
-                        "Managing Inbound/Outbound Calls"
-                    ]
-                },
-                {
-                    "day": 14,
-                    "date": "2026-03-10",
-                    "startTime": "06:47 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Helped edit the Fire Prevention Video"
-                    ]
-                },
-                {
-                    "day": 15,
-                    "date": "2026-03-11",
-                    "startTime": "07:30 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.5,
-                    "hoursWorkedLabel": "9 Hours, 30 Minutes",
-                    "activities": [
-                        "Did a shoot for Heat Index",
-                        "Prepare Fire Drill Equipments"
-                    ]
-                },
-                {
-                    "day": 16,
-                    "date": "2026-03-12",
-                    "startTime": "07:20 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Document Dispatch",
-                        "Setup Control Room"
-                    ]
-                }
-            ],
-            "totalHours": 39.33
-        },
-        {
-            "week": 5,
-            "period": "March 16-19, 2026",
-            "days": [
-                {
-                    "day": 17,
-                    "date": "2026-03-16",
-                    "startTime": "07:10 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.83,
-                    "hoursWorkedLabel": "9 Hours, 50 Minutes",
-                    "activities": [
-                        "Editing the Fire Drill Video",
-                        "Cloned and Setup the GUIDE Website in the laptop"
-                    ]
-                },
-                {
-                    "day": 18,
-                    "date": "2026-03-17",
-                    "startTime": "06:47 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Assigned to a new Project KLIMA",
-                        "Planning on how the structure of KLIMA is going to be developed"
-                    ]
-                },
-                {
-                    "day": 19,
-                    "date": "2026-03-18",
-                    "startTime": "07:30 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.5,
-                    "hoursWorkedLabel": "9 Hours, 30 Minutes",
-                    "activities": [
-                        "Conducted a Website review again for the Old Design then Setup REACT Framework for the new Design",
-                        "Started Developing KLIMA User Interface"
-                    ]
-                },
-                {
-                    "day": 20,
-                    "date": "2026-03-19",
-                    "startTime": "07:20 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Document Dispatch",
-                        "Development of KLIMA"
-                    ]
-                }
-            ],
-            "totalHours": 39.33
-        },
-        {
-            "week": 6,
-            "period": "March 23-26, 2026",
-            "days": [
-                {
-                    "day": 21,
-                    "date": "2026-03-23",
-                    "startTime": "07:10 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.83,
-                    "hoursWorkedLabel": "9 Hours, 50 Minutes",
-                    "activities": [
-                        "Development of KLIMA",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 22,
-                    "date": "2026-03-24",
-                    "startTime": "06:47 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Development of KLIMA",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 23,
-                    "date": "2026-03-25",
-                    "startTime": "07:30 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.5,
-                    "hoursWorkedLabel": "9 Hours, 30 Minutes",
-                    "activities": [
-                        "Development of KLIMA",
-                        "Assigned to Develop CCTV Dashboard for 11 Campuses"
-                    ]
-                },
-                {
-                    "day": 24,
-                    "date": "2026-03-26",
-                    "startTime": "07:20 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Development of KLIMA",
-                        "Document Dispatch",
-                        "Setup Control Room"
-                    ]
-                }
-            ],
-            "totalHours": 39.33
-        },
-        {
-            "week": 7,
-            "period": "March 30-31, 2026",
-            "days": [
-                {
-                    "day": 25,
-                    "date": "2026-03-30",
-                    "startTime": "07:10 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 9.83,
-                    "hoursWorkedLabel": "9 Hours, 50 Minutes",
-                    "activities": [
-                        "Created the Github Repository for CCTV Dashboard, then started to research on how to create it",
-                        "Set up the folder structure and installed core dependencies like hls.js and lucide-react for CCTV Dashboard"
-                    ]
-                },
-                {
-                    "day": 26,
-                    "date": "2026-03-31",
-                    "startTime": "06:47 AM",
-                    "endTime": "06:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Successfully set up the foundation for the 11-campus CCTV Dashboard (UI Design Only)"
-                    ]
-                }
-            ],
-            "totalHours": 19.83
-        },
-        {
-            "week": 8,
-            "period": "April 6-9, 2026",
-            "days": [
-                {
-                    "day": 29,
-                    "date": "2026-04-06",
-                    "startTime": "07:45 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Development of the CCTV Dashboard",
-                        "Trying to implement a Mock CCTV video for the testing of the CCTV Footage, Still not working"
-                    ]
-                },
-                {
-                    "day": 30,
-                    "date": "2026-04-07",
-                    "startTime": "07:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Revisions for the UI of KLIMA",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 31,
-                    "date": "2026-04-08",
-                    "startTime": "07:40 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Continued developing the CCTV Dashboard"
-                    ]
-                }
-            ],
-            "totalHours": 30
-        },
-        {
-            "week": 9,
-            "period": "April 13-16, 2026",
-            "days": [
-                {
-                    "day": 32,
-                    "date": "2026-04-13",
-                    "startTime": "07:30 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Presented the Finalized UI of KLIMA"
-                    ]
-                },
-                {
-                    "day": 33,
-                    "date": "2026-04-14",
-                    "startTime": "07:29 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Continued the Development of CCTV Dashboard"
-                    ]
-                },
-                {
-                    "day": 34,
-                    "date": "2026-04-15",
-                    "startTime": "07:37 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Asked for the Legit RTSP of the CCTV Camera",
-                        "Implemented a few fixes since the dashboard is not displaying the footage"
-                    ]
-                },
-                {
-                    "day": 35,
-                    "date": "2026-04-16",
-                    "startTime": "07:38 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Successfully Displayed the Real CCTV Footage",
-                        "Implemented a snapshot feature in the CCTV footage"
-                    ]
-                }
-            ],
-            "totalHours": 40
-        },
-        {
-            "week": 10,
-            "period": "April 20-23, 2026",
-            "days": [
-                {
-                    "day": 36,
-                    "date": "2026-04-20",
-                    "startTime": "08:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Developed the RDANA Using React/Typescript Framework, then converted it into HTML",
-                        "Created a Narrative Report for the Meeting with SSS-NPWD"
-                    ]
-                },
-                {
-                    "day": 37,
-                    "date": "2026-04-21",
-                    "startTime": "08:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Revision RDANA UI",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 38,
-                    "date": "2026-04-22",
-                    "startTime": "08:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Document Dispatch",
-                        "CCTV Dashboard Debugging"
-                    ]
-                },
-                {
-                    "day": 39,
-                    "date": "2026-04-23",
-                    "startTime": "08:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Document Dispatch",
-                        "CCTV Dashboard applied multi view, 4 cameras connected",
-                        "CCTV Dashboard UI Revision"
-                    ]
-                }
-            ],
-            "totalHours": 40
-        },
-        {
-            "week": 11,
-            "period": "April 27-30, 2026",
-            "days": [
-                {
-                    "day": 40,
-                    "date": "2026-04-27",
-                    "startTime": "07:13 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Setup Control Room",
-                        "CCTV Dashboard UI Revision"
-                    ]
-                },
-                {
-                    "day": 41,
-                    "date": "2026-04-28",
-                    "startTime": "07:55 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "CCTV Dashboard UI Revision"
-                    ]
-                },
-                {
-                    "day": 42,
-                    "date": "2026-04-29",
-                    "startTime": "08:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Setup Control Room",
-                        "CCTV Dashboard UI Revision"
-                    ]
-                },
-                {
-                    "day": 43,
-                    "date": "2026-04-30",
-                    "startTime": "08:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "CCTV Dashboard UI Revision"
-                    ]
-                }
-            ],
-            "totalHours": 40
-        },
-        {
-            "week": 12,
-            "period": "May 4-7, 2026",
-            "days": [
-                {
-                    "day": 44,
-                    "date": "2026-05-04",
-                    "startTime": "07:25 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Setup Control Room",
-                        "Creating Powerpoint Presentation for EWS",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 45,
-                    "date": "2026-05-05",
-                    "startTime": "07:55 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Setup Control Room",
-                        "Document Dispatch"
-                    ]
-                },
-                {
-                    "day": 46,
-                    "date": "2026-05-06",
-                    "startTime": "07:21 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "Setup Control Room"
-                    ]
-                },
-                {
-                    "day": 47,
-                    "date": "2026-05-07",
-                    "startTime": "07:00 AM",
-                    "endTime": "07:00 PM",
-                    "hoursWorked": 10,
-                    "hoursWorkedLabel": "10 Hours",
-                    "activities": [
-                        "CCTV Dashboard UI Revision"
-                    ]
-                }
-            ],
-            "totalHours": 40
-        }
-    ]
+    {
+        "week": 1,
+        "period": "February 19-20, 2026",
+        "days": [
+            {
+                "day": 1,
+                "date": "2026-02-19",
+                "startTime": "07:05 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Created a T-Shirt Design for Fire Prevention Month",
+                    "Did a shoot for Do's and Don't for Fire Prevention Month"
+                ]
+            },
+            {
+                "day": 2,
+                "date": "2026-02-20",
+                "startTime": "06:38 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Attended a Fire Safety Training for Fire Drill"
+                ]
+            }
+        ],
+        "totalHours": 16
+    },
+    {
+        "week": 2,
+        "period": "February 23-27, 2026",
+        "days": [
+            {
+                "day": 3,
+                "date": "2026-02-23",
+                "startTime": "07:47 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Shoot for Fire Prevention Month",
+                    "Attended the DPWH Job Fair"
+                ]
+            },
+            {
+                "day": 4,
+                "date": "2026-02-24",
+                "startTime": "07:10 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Collaborated with Team GADC",
+                    "Completed a QA review and presented findings and identified improvements to Sir Rod and Sir Erwin"
+                ]
+            },
+            {
+                "day": 5,
+                "date": "2026-02-25",
+                "startTime": "07:50 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Reviewed the documentation for the GUIDE Website",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 6,
+                "date": "2026-02-26",
+                "startTime": "07:47 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Video Editing for Fire Prevention Month Video",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 7,
+                "date": "2026-02-27",
+                "startTime": "07:00 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Cloned the repository and started a quick code review for the new mock design of GUIDE Web"
+                ]
+            }
+        ],
+        "totalHours": 40
+    },
+    {
+        "week": 3,
+        "period": "March 2-6, 2026",
+        "days": [
+            {
+                "day": 8,
+                "date": "2026-03-02",
+                "startTime": "05:50 AM",
+                "endTime": "04:39 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Setup Equipments for NSFD",
+                    "Participated for the rehearsal of NSFD",
+                    "Managing Inbound/Outbound Calls"
+                ]
+            },
+            {
+                "day": 9,
+                "date": "2026-03-03",
+                "startTime": "07:37 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Fire Prevention Video Edit"
+                ]
+            },
+            {
+                "day": 10,
+                "date": "2026-03-04",
+                "startTime": "07:36 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Did a shoot for Heat Index",
+                    "Prepare Fire Drill Equipments"
+                ]
+            },
+            {
+                "day": 11,
+                "date": "2026-03-05",
+                "startTime": "08:04 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 7.93,
+                "activities": [
+                    "Document Dispatch",
+                    "Setup Control Room"
+                ]
+            },
+            {
+                "day": 12,
+                "date": "2026-03-06",
+                "startTime": "07:39 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Video Edit for Do's and Don'ts for Fire Prevention Month",
+                    "Participated in Fire Olympics Training"
+                ]
+            }
+        ],
+        "totalHours": 39.93
+    },
+    {
+        "week": 4,
+        "period": "March 9-12, 2026",
+        "days": [
+            {
+                "day": 13,
+                "date": "2026-03-09",
+                "startTime": "07:10 AM",
+                "endTime": "06:00 PM",
+                "hoursWorked": 9.83,
+                "activities": [
+                    "Video Shoot/Edit for Heat Index",
+                    "Managing Inbound/Outbound Calls"
+                ]
+            },
+            {
+                "day": 14,
+                "date": "2026-03-10",
+                "startTime": "06:47 AM",
+                "endTime": "06:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Helped edit the Fire Prevention Video"
+                ]
+            },
+            {
+                "day": 15,
+                "date": "2026-03-11",
+                "startTime": "07:30 AM",
+                "endTime": "06:00 PM",
+                "hoursWorked": 9.5,
+                "activities": [
+                    "Did a shoot for Heat Index",
+                    "Prepare Fire Drill Equipments"
+                ]
+            },
+            {
+                "day": 16,
+                "date": "2026-03-12",
+                "startTime": "07:20 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 9.67,
+                "activities": [
+                    "Document Dispatch",
+                    "Setup Control Room"
+                ]
+            }
+        ],
+        "totalHours": 39
+    },
+    {
+        "week": 5,
+        "period": "March 16-19, 2026",
+        "days": [
+            {
+                "day": 17,
+                "date": "2026-03-16",
+                "startTime": "06:50 AM",
+                "endTime": "04:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Editing the Fire Drill Video",
+                    "Cloned and Setup the GUIDE Website in the laptop"
+                ]
+            },
+            {
+                "day": 18,
+                "date": "2026-03-17",
+                "startTime": "07:23 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Assigned to a new Project KLIMA",
+                    "Planning on how the structure of KLIMA is going to be developed"
+                ]
+            },
+            {
+                "day": 19,
+                "date": "2026-03-18",
+                "startTime": "07:20 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Conducted a Website review again for the Old Design then Setup REACT Framework",
+                    "Started Developing KLIMA User Interface"
+                ]
+            },
+            {
+                "day": 20,
+                "date": "2026-03-19",
+                "startTime": "07:10 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Document Dispatch",
+                    "Development of KLIMA"
+                ]
+            }
+        ],
+        "totalHours": 32
+    },
+    {
+        "week": 6,
+        "period": "March 23-26, 2026",
+        "days": [
+            {
+                "day": 21,
+                "date": "2026-03-23",
+                "startTime": "07:45 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Development of KLIMA",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 22,
+                "date": "2026-03-24",
+                "startTime": "07:56 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Development of KLIMA",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 23,
+                "date": "2026-03-25",
+                "startTime": "07:50 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Development of KLIMA",
+                    "Assigned to Develop CCTV Dashboard for 11 Campuses"
+                ]
+            },
+            {
+                "day": 24,
+                "date": "2026-03-26",
+                "startTime": "07:41 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Development of KLIMA",
+                    "Document Dispatch",
+                    "Setup Control Room"
+                ]
+            }
+        ],
+        "totalHours": 40
+    },
+    {
+        "week": 7,
+        "period": "March 30-31, 2026",
+        "days": [
+            {
+                "day": 25,
+                "date": "2026-03-30",
+                "startTime": "07:27 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Created the Github Repository for CCTV Dashboard",
+                    "Started research and setup of core dependencies"
+                ]
+            },
+            {
+                "day": 26,
+                "date": "2026-03-31",
+                "startTime": "07:49 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Successfully set up the foundation for the 11-campus CCTV Dashboard (UI Design Only)"
+                ]
+            }
+        ],
+        "totalHours": 16
+    },
+    {
+        "week": 8,
+        "period": "April 6-8, 2026",
+        "days": [
+            {
+                "day": 29,
+                "date": "2026-04-06",
+                "startTime": "07:45 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Development of the CCTV Dashboard",
+                    "Attempted implementation of Mock CCTV video for testing"
+                ]
+            },
+            {
+                "day": 30,
+                "date": "2026-04-07",
+                "startTime": "07:50 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Revisions for the UI of KLIMA",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 31,
+                "date": "2026-04-08",
+                "startTime": "07:40 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Continued developing the CCTV Dashboard"
+                ]
+            }
+        ],
+        "totalHours": 30
+    },
+    {
+        "week": 9,
+        "period": "April 13-16, 2026",
+        "days": [
+            {
+                "day": 32,
+                "date": "2026-04-13",
+                "startTime": "07:30 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Presented the Finalized UI of KLIMA"
+                ]
+            },
+            {
+                "day": 33,
+                "date": "2026-04-14",
+                "startTime": "07:29 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Continued the Development of CCTV Dashboard"
+                ]
+            },
+            {
+                "day": 34,
+                "date": "2026-04-15",
+                "startTime": "07:37 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Asked for the Legit RTSP of the CCTV Camera",
+                    "Implemented fixes for dashboard footage display"
+                ]
+            },
+            {
+                "day": 35,
+                "date": "2026-04-16",
+                "startTime": "07:38 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Successfully Displayed the Real CCTV Footage",
+                    "Implemented a snapshot feature in the CCTV footage"
+                ]
+            }
+        ],
+        "totalHours": 40
+    },
+    {
+        "week": 10,
+        "period": "April 20-23, 2026",
+        "days": [
+            {
+                "day": 36,
+                "date": "2026-04-20",
+                "startTime": "07:42 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Developed the RDANA Using React/Typescript Framework",
+                    "Created a Narrative Report for the Meeting with SSS-NPWD"
+                ]
+            },
+            {
+                "day": 37,
+                "date": "2026-04-21",
+                "startTime": "07:48 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Revision RDANA UI",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 38,
+                "date": "2026-04-22",
+                "startTime": "07:52 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Document Dispatch",
+                    "CCTV Dashboard Debugging"
+                ]
+            },
+            {
+                "day": 39,
+                "date": "2026-04-23",
+                "startTime": "07:43 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Document Dispatch",
+                    "CCTV Dashboard applied multi view",
+                    "CCTV Dashboard UI Revision"
+                ]
+            }
+        ],
+        "totalHours": 40
+    },
+    {
+        "week": 11,
+        "period": "April 27-30, 2026",
+        "days": [
+            {
+                "day": 40,
+                "date": "2026-04-27",
+                "startTime": "07:13 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Setup Control Room",
+                    "CCTV Dashboard UI Revision"
+                ]
+            },
+            {
+                "day": 41,
+                "date": "2026-04-28",
+                "startTime": "07:55 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "CCTV Dashboard UI Revision"
+                ]
+            },
+            {
+                "day": 42,
+                "date": "2026-04-29",
+                "startTime": "08:00 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "Setup Control Room",
+                    "CCTV Dashboard UI Revision"
+                ]
+            },
+            {
+                "day": 43,
+                "date": "2026-04-30",
+                "startTime": "08:00 AM",
+                "endTime": "05:00 PM",
+                "hoursWorked": 8,
+                "activities": [
+                    "CCTV Dashboard UI Revision"
+                ]
+            }
+        ],
+        "totalHours": 32
+    },
+    {
+        "week": 12,
+        "period": "May 4-7, 2026",
+        "days": [
+            {
+                "day": 44,
+                "date": "2026-05-04",
+                "startTime": "07:25 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Setup Control Room",
+                    "Creating Powerpoint Presentation for EWS",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 45,
+                "date": "2026-05-05",
+                "startTime": "07:55 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Setup Control Room",
+                    "Document Dispatch"
+                ]
+            },
+            {
+                "day": 46,
+                "date": "2026-05-06",
+                "startTime": "07:57 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "Setup Control Room"
+                ]
+            },
+            {
+                "day": 47,
+                "date": "2026-05-07",
+                "startTime": "07:00 AM",
+                "endTime": "07:00 PM",
+                "hoursWorked": 10,
+                "activities": [
+                    "CCTV Dashboard UI Revision"
+                ]
+            }
+        ],
+        "totalHours": 40
+    }
+]
 }
