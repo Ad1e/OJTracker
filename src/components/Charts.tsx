@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { LogEntry } from "../hooks/useHoursCalc";
-import { parseLocalDate } from "../hooks/useHoursCalc";
+import type { LogEntry } from "../types";
+import { parseLocalDate } from "../hooks/use-hours-calc";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

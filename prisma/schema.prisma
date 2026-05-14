@@ -5,9 +5,9 @@
 // Database: Supabase (PostgreSQL 15)
 //
 // Cascade policy summary:
-//   User   → Student       : CASCADE  (account deleted = profile deleted)
-//   Company → Student      : RESTRICT (company cannot be deleted while students are enrolled)
-//   Student → AttendanceLog: CASCADE  (student deleted = all attendance records deleted)
+//   User   → Intern       : CASCADE  (account deleted = profile deleted)
+//   Company → Intern      : RESTRICT (company cannot be deleted while interns are enrolled)
+//   Intern → AttendanceLog: CASCADE  (intern deleted = all attendance records deleted)
 //
 // To apply: npx prisma migrate dev --name init
 // To reset: npx prisma migrate reset
@@ -51,8 +51,8 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // ── Relations ──────────────────────────────────────────────────────────────
-  /// One-to-one: each authenticated user has at most one student profile.
-  student   Student?
+  /// One-to-one: each authenticated user has at most one intern profile.
+  intern    Intern?
 
   @@index([authId])
   @@map("users")
@@ -72,25 +72,25 @@ model Company {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   // ── Relations ──────────────────────────────────────────────────────────────
-  /// RESTRICT: a company record cannot be deleted while students are enrolled.
+  /// RESTRICT: a company record cannot be deleted while interns are enrolled.
   /// This is intentional — deleting a company is an admin action that requires
-  /// first reassigning or graduating all enrolled students.
-  students        Student[]
+  /// first reassigning or graduating all enrolled interns.
+  interns         Intern[]
 
   @@map("companies")
 }
 
-/// A student/trainee enrolled in On-the-Job Training.
+/// An OJT intern/trainee enrolled in On-the-Job Training.
 /// One-to-one with User (the authenticated account that owns this profile).
-model Student {
+model Intern {
   id            String   @id @default(cuid())
-  /// School-assigned student number (e.g. "2021-00123"). Must be globally unique.
-  studentId     String   @unique @map("student_id")
+  /// School-assigned intern number (e.g. "2021-00123"). Must be globally unique.
+  internId      String   @unique @map("intern_id")
   name          String
-  /// Total OJT hours the student must complete (e.g. 500.00).
+  /// Total OJT hours the intern must complete (e.g. 500.00).
   /// Stored as Decimal to avoid IEEE-754 float rounding on cumulative sums.
   requiredHours Decimal  @db.Decimal(6, 2) @map("required_hours")
-  /// The calendar date the student officially started OJT (date only, no time).
+  /// The calendar date the intern officially started OJT (date only, no time).
   enrolledAt    DateTime @db.Date @map("enrolled_at")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
@@ -100,20 +100,19 @@ model Student {
   companyId String @map("company_id")
 
   // ── Relations ──────────────────────────────────────────────────────────────
-  /// CASCADE: deleting the auth account removes the student profile.
+  /// CASCADE: deleting the auth account removes the intern profile.
   user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  /// RESTRICT: student cannot be deleted while the company record exists.
-  /// The company must be reassigned or the student graduated first.
+  /// RESTRICT: intern cannot be reassigned while the company record exists.
   company        Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  /// CASCADE: all attendance logs are deleted when the student is deleted.
+  /// CASCADE: all attendance logs are deleted when the intern is deleted.
   attendanceLogs AttendanceLog[]
 
   @@index([companyId])
-  @@map("students")
+  @@map("interns")
 }
 
-/// A single day's attendance record for a student.
-/// One record per student per calendar day (enforced by @@unique).
+/// A single day's attendance record for an intern.
+/// One record per intern per calendar day (enforced by @@unique).
 model AttendanceLog {
   id   String @id @default(cuid())
 
@@ -127,30 +126,26 @@ model AttendanceLog {
 
   /// Net hours rendered after deductions (e.g. lunch break).
   /// Stored as Decimal(4,2) — supports values like 0.00 to 99.99 hours.
-  /// Must be computed and persisted by the application layer before saving;
-  /// Prisma does not support computed columns.
-  /// Default 0: ABSENT rows record zero hours.
   hoursRendered Decimal          @default(0) @db.Decimal(4, 2) @map("hours_rendered")
 
   status AttendanceStatus
   /// Free-form notes (e.g. "Arrived 30 minutes late due to transport strike").
-  /// Optional: most logs will not need this field.
   notes  String?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // ── Foreign keys ───────────────────────────────────────────────────────────
-  studentId String @map("student_id")
+  internId String @map("intern_id")
 
   // ── Relations ──────────────────────────────────────────────────────────────
-  /// CASCADE: attendance logs are removed when the student is deleted.
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  /// CASCADE: attendance logs are removed when the intern is deleted.
+  intern  Intern @relation(fields: [internId], references: [id], onDelete: Cascade)
 
   // ── Constraints ────────────────────────────────────────────────────────────
-  /// Prevents duplicate entries: one log per student per calendar day.
-  @@unique([studentId, date])
-  @@index([studentId])
+  /// Prevents duplicate entries: one log per intern per calendar day.
+  @@unique([internId, date])
+  @@index([internId])
   @@index([date])
   /// Index on status allows efficient dashboard queries like
   /// "show all LATE entries this month" without a full table scan.

@@ -214,9 +214,9 @@ app.get("/api/entries", (_req: Request, res: Response) => {
  */
 app.post("/api/entries", (req: Request, res: Response) => {
   try {
-    const validation = validateLogEntry(req.body);
-    if (!validation.valid) {
-      return sendError(res, 400, validation.errors);
+    const parsed = logEntrySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return sendError(res, 400, parsed.error.issues.map((issue: z.ZodIssue) => issue.message));
     }
 
     const journal = readJournal();
