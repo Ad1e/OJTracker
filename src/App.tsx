@@ -184,6 +184,7 @@ export default function App() {
 
   // ── Error state ───────────────────────────────────────────────────────────
   if (error) {
+    const isServerError = error.includes("Local server") || error.includes("/api/entries");
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="glass-card max-w-md p-8 text-center">
@@ -192,9 +193,22 @@ export default function App() {
               <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </div>
-          <h2 className="text-base font-display font-bold text-white mb-2">Could not connect</h2>
-          <p className="text-sm text-slate-400 mb-1">{error}</p>
-          <p className="text-xs text-slate-500">Check your Supabase environment variables in <code className="text-slate-400">.env.local</code></p>
+          {isServerError ? (
+            <>
+              <h2 className="text-base font-display font-bold text-white mb-2">Backend server not running</h2>
+              <p className="text-sm text-slate-400 mb-3">Start the local Express server in a separate terminal:</p>
+              <code className="block bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-accent font-mono mb-4">
+                npm run server
+              </code>
+              <p className="text-xs text-slate-500">Or start both at once with <code className="text-slate-400">npm run dev:all</code></p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-base font-display font-bold text-white mb-2">Could not connect</h2>
+              <p className="text-sm text-slate-400 mb-1">{error}</p>
+              <p className="text-xs text-slate-500">Check your Supabase environment variables in <code className="text-slate-400">.env.local</code></p>
+            </>
+          )}
         </div>
       </div>
     );

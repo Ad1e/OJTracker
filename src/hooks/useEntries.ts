@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabase.ts";
 import type { LogEntry } from "./useHoursCalc";
-import fallbackData from "../data/journalData.json";
+
+// ─── Local API base URL ───────────────────────────────────────────────────────
+// When Supabase is not configured the app falls back to the local Express
+// server (server/index.ts). Vite proxies /api/* → http://localhost:3001 in dev.
+const LOCAL_API = "/api";
 
 // ─── Row mapper ───────────────────────────────────────────────────────────────
 // DB columns are snake_case; LogEntry fields are camelCase.
@@ -18,6 +22,27 @@ function toLogEntry(row: Record<string, any>): LogEntry {
     activity: row.activity as string,
     isHoliday: Boolean(row.is_holiday),
   };
+}
+
+// ─── Local API helpers ────────────────────────────────────────────────────────
+
+/** Check whether the local Express server is reachable. */
+async function isServerAlive(): Promise<boolean> {
+  try {
+    const res = await fetch("/health", { method: "GET" });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Fetch all entries from the local Express server. */
+async function fetchLocalEntries(): Promise<LogEntry[]> {
+  const res = await fetch(`${LOCAL_API}/entries`);
+  if (!res.ok) throw new Error(`GET /api/entries failed: ${res.status}`);
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error?.message ?? "Unknown error");
+  return (json.data as LogEntry[]).sort((a, b) => b.date.localeCompare(a.date));
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -42,31 +67,36 @@ export function useEntries(): UseEntriesReturn {
     setLoading(true);
 
     if (!supabase) {
-      console.warn("[useEntries] Supabase not configured. Using fallback data.");
-      // Flatten the new week-based JSON structure: weeks[].days[]
-      const allDays = (fallbackData.weeks ?? []).flatMap((week) => week.days ?? []);
-      const mockEntries = allDays.map((e, index) => ({
-        id: `mock-${index + 1}`,
-        day: e.day,
-        date: e.date,
-        startTime: e.startTime,
-        endTime: e.endTime,
-        hoursWorked: e.hoursWorked,
-        // Join the activities array into a single string for backward compatibility
-        activity: Array.isArray(e.activities) ? e.activities.join("; ") : "",
-        isHoliday: false,
-        createdAt: new Date().toISOString(),
-      }));
-
-      setTimeout(() => {
+      // ── Local Express backend path ──────────────────────────────────────
+      (async () => {
+        const alive = await isServerAlive();
         if (!mounted) return;
-        setEntries(mockEntries.sort((a, b) => b.date.localeCompare(a.date)));
-        setError(null);
-        setLoading(false);
-      }, 500);
+
+        if (!alive) {
+          setError(
+            "Local server is not running. Start it with: npm run server"
+          );
+          setLoading(false);
+          return;
+        }
+
+        try {
+          const data = await fetchLocalEntries();
+          if (!mounted) return;
+          setEntries(data);
+          setError(null);
+        } catch (err) {
+          if (!mounted) return;
+          setError((err as Error).message);
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      })();
+
       return () => { mounted = false; };
     }
 
+    // ── Supabase path ─────────────────────────────────────────────────────
     supabase
       .from("log_entries")
       .select("*")
@@ -89,11 +119,38 @@ export function useEntries(): UseEntriesReturn {
   const addEntry = useCallback(
     async (entry: Omit<LogEntry, "id" | "createdAt">): Promise<LogEntry | null> => {
       if (!supabase) {
-        const newEntry = { ...entry, id: `mock-${crypto.randomUUID()}`, createdAt: new Date().toISOString() } as LogEntry;
-        setEntries((prev) => [newEntry, ...prev]);
-        return newEntry;
+        // ── Local backend ────────────────────────────────────────────────
+        try {
+          const res = await fetch(`${LOCAL_API}/entries`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              day: entry.day,
+              date: entry.date,
+              startTime: entry.startTime,
+              endTime: entry.endTime,
+              hoursWorked: entry.hoursWorked,
+              activity: entry.activity,
+              isHoliday: entry.isHoliday,
+            }),
+          });
+
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            console.error("[useEntries] addEntry failed:", json.error);
+            return null;
+          }
+
+          const newEntry = json.data as LogEntry;
+          setEntries((prev) => [newEntry, ...prev]);
+          return newEntry;
+        } catch (err) {
+          console.error("[useEntries] addEntry network error:", err);
+          return null;
+        }
       }
 
+      // ── Supabase ────────────────────────────────────────────────────────
       const { data, error: err } = await supabase
         .from("log_entries")
         .insert({
@@ -114,7 +171,6 @@ export function useEntries(): UseEntriesReturn {
       }
 
       const newEntry = toLogEntry(data);
-      // Prepend so it appears at the top (table sorts by date desc)
       setEntries((prev) => [newEntry, ...prev]);
       return newEntry;
     },
@@ -128,17 +184,37 @@ export function useEntries(): UseEntriesReturn {
       patch: Partial<Omit<LogEntry, "id" | "createdAt">>
     ): Promise<LogEntry | null> => {
       if (!supabase) {
-        let updated: LogEntry | null = null;
-        setEntries((prev) => prev.map((e) => {
-          if (e.id === id) {
-            updated = { ...e, ...patch } as LogEntry;
-            return updated;
+        // ── Local backend ────────────────────────────────────────────────
+        try {
+          const res = await fetch(`${LOCAL_API}/entries/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...(patch.date !== undefined && { date: patch.date }),
+              ...(patch.startTime !== undefined && { startTime: patch.startTime }),
+              ...(patch.endTime !== undefined && { endTime: patch.endTime }),
+              ...(patch.hoursWorked !== undefined && { hoursWorked: patch.hoursWorked }),
+              ...(patch.activity !== undefined && { activity: patch.activity }),
+              ...(patch.isHoliday !== undefined && { isHoliday: patch.isHoliday }),
+            }),
+          });
+
+          const json = await res.json();
+          if (!res.ok || !json.success) {
+            console.error("[useEntries] updateEntry failed:", json.error);
+            return null;
           }
-          return e;
-        }));
-        return updated;
+
+          const updated = json.data as LogEntry;
+          setEntries((prev) => prev.map((e) => (e.id === id ? updated : e)));
+          return updated;
+        } catch (err) {
+          console.error("[useEntries] updateEntry network error:", err);
+          return null;
+        }
       }
 
+      // ── Supabase ────────────────────────────────────────────────────────
       const { data, error: err } = await supabase
         .from("log_entries")
         .update({
@@ -175,9 +251,33 @@ export function useEntries(): UseEntriesReturn {
       setEntries((prev) => prev.filter((e) => e.id !== id));
 
       if (!supabase) {
-        return true;
+        // ── Local backend ────────────────────────────────────────────────
+        try {
+          const res = await fetch(`${LOCAL_API}/entries/${id}`, { method: "DELETE" });
+          const json = await res.json();
+
+          if (!res.ok || !json.success) {
+            console.error("[useEntries] deleteEntry failed:", json.error);
+            if (snapshot) {
+              setEntries((prev) =>
+                [...prev, snapshot].sort((a, b) => b.date.localeCompare(a.date))
+              );
+            }
+            return false;
+          }
+          return true;
+        } catch (err) {
+          console.error("[useEntries] deleteEntry network error:", err);
+          if (snapshot) {
+            setEntries((prev) =>
+              [...prev, snapshot].sort((a, b) => b.date.localeCompare(a.date))
+            );
+          }
+          return false;
+        }
       }
 
+      // ── Supabase ────────────────────────────────────────────────────────
       const { error: err } = await supabase
         .from("log_entries")
         .delete()
@@ -185,7 +285,6 @@ export function useEntries(): UseEntriesReturn {
 
       if (err) {
         console.error("[useEntries] deleteEntry failed:", err.message);
-        // Rollback: re-insert the snapshotted entry in place
         if (snapshot) {
           setEntries((prev) =>
             [...prev, snapshot].sort((a, b) => b.date.localeCompare(a.date))

@@ -13,12 +13,13 @@ const JOURNAL_PATH = path.join(__dirname, "../src/data/journalData.json");
 // ─── Middleware ──────────────────────────────────────────────────────────────
 
 app.use(cors());
-app.use(express.json({ limit: "1mb" })); // Prevent large payloads
+app.use(express.json({ limit: "1mb" }));
 
 // ─── Type Definitions ────────────────────────────────────────────────────────
 
+/** A flat log entry as used by the frontend (camelCase) */
 interface LogEntry {
-  id?: string;
+  id: string;
   day: number;
   date: string;
   startTime: string;
@@ -29,6 +30,35 @@ interface LogEntry {
   createdAt?: string;
 }
 
+/** A single day as stored in journalData.json */
+interface JournalDay {
+  day: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  hoursWorked: number;
+  activities: string[];
+  isHoliday?: boolean;
+  id?: string;
+  createdAt?: string;
+}
+
+/** A week block as stored in journalData.json */
+interface JournalWeek {
+  week: number;
+  period: string;
+  days: JournalDay[];
+  totalHours: number;
+}
+
+/** The full journalData.json structure */
+interface JournalData {
+  trainee: string;
+  course: string;
+  supervisor: string;
+  weeks: JournalWeek[];
+}
+
 interface ValidationResult {
   valid: boolean;
   errors: string[];
@@ -36,16 +66,12 @@ interface ValidationResult {
 
 // ─── Validation ──────────────────────────────────────────────────────────────
 
-/**
- * Validate time format (HH:mm)
- */
 function isValidTimeFormat(time: string): boolean {
-  return /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(time);
+  // Accept HH:mm (24h) or "hh:mm AM/PM" (12h legacy)
+  return /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(time) ||
+    /^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(time);
 }
 
-/**
- * Validate log entry structure and values
- */
 function validateLogEntry(data: unknown): ValidationResult {
   const errors: string[] = [];
 
@@ -55,33 +81,26 @@ function validateLogEntry(data: unknown): ValidationResult {
 
   const entry = data as Record<string, unknown>;
 
-  // Validate required fields
-  if (typeof entry.day !== "number" || entry.day < 1) {
-    errors.push("day must be a positive number");
-  }
-
   if (typeof entry.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) {
     errors.push("date must be in YYYY-MM-DD format");
   }
 
-  if (!isValidTimeFormat(entry.startTime as string)) {
-    errors.push("startTime must be in HH:mm format");
+  const isHoliday = Boolean(entry.isHoliday);
+
+  if (!isHoliday) {
+    if (!isValidTimeFormat(entry.startTime as string)) {
+      errors.push("startTime must be in HH:mm or hh:mm AM/PM format");
+    }
+    if (!isValidTimeFormat(entry.endTime as string)) {
+      errors.push("endTime must be in HH:mm or hh:mm AM/PM format");
+    }
+    if (typeof entry.hoursWorked !== "number" || entry.hoursWorked < 0 || entry.hoursWorked > 24) {
+      errors.push("hoursWorked must be a number between 0 and 24");
+    }
   }
 
-  if (!isValidTimeFormat(entry.endTime as string)) {
-    errors.push("endTime must be in HH:mm format");
-  }
-
-  if (typeof entry.hoursWorked !== "number" || entry.hoursWorked < 0 || entry.hoursWorked > 24) {
-    errors.push("hoursWorked must be a number between 0 and 24");
-  }
-
-  if (typeof entry.activity !== "string" || entry.activity.length < 3 || entry.activity.length > 500) {
+  if (typeof entry.activity !== "string" || entry.activity.trim().length < 3 || entry.activity.length > 500) {
     errors.push("activity must be a string between 3 and 500 characters");
-  }
-
-  if (typeof entry.isHoliday !== "boolean") {
-    errors.push("isHoliday must be a boolean");
   }
 
   return { valid: errors.length === 0, errors };
@@ -89,27 +108,100 @@ function validateLogEntry(data: unknown): ValidationResult {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function readJournal(): any {
+/** Read the full journalData.json file. Returns a safe default if missing. */
+function readJournal(): JournalData {
   try {
-    const data = fs.readFileSync(JOURNAL_PATH, "utf-8");
-    return JSON.parse(data);
+    if (!fs.existsSync(JOURNAL_PATH)) {
+      return { trainee: "", course: "", supervisor: "", weeks: [] };
+    }
+    const raw = fs.readFileSync(JOURNAL_PATH, "utf-8");
+    return JSON.parse(raw) as JournalData;
   } catch (error) {
-    console.error("Error reading journal:", error);
-    return { config: {}, entries: [] };
+    console.error("❌ Error reading journal:", error);
+    return { trainee: "", course: "", supervisor: "", weeks: [] };
   }
 }
 
-function writeJournal(data: any): void {
+/** Overwrite journalData.json with nicely-formatted JSON. */
+function writeJournal(data: JournalData): void {
   try {
     fs.writeFileSync(JOURNAL_PATH, JSON.stringify(data, null, 4), "utf-8");
   } catch (error) {
-    console.error("Error writing journal:", error);
+    console.error("❌ Error writing journal:", error);
+    throw error; // re-throw so the route handler can return 500
   }
 }
 
+/** Flatten weeks[].days[] into a single LogEntry array for the frontend. */
+function flattenEntries(journal: JournalData): LogEntry[] {
+  return journal.weeks.flatMap((week) =>
+    week.days.map((day) => ({
+      id: day.id ?? `day-${day.day}`,
+      day: day.day,
+      date: day.date,
+      startTime: day.startTime,
+      endTime: day.endTime,
+      hoursWorked: day.hoursWorked,
+      activity: Array.isArray(day.activities) ? day.activities.join("; ") : "",
+      isHoliday: day.isHoliday ?? false,
+      createdAt: day.createdAt,
+    }))
+  );
+}
+
+/** Find which week a day ID lives in, and return both indices. */
+function findDay(journal: JournalData, id: string): { weekIdx: number; dayIdx: number } | null {
+  for (let wi = 0; wi < journal.weeks.length; wi++) {
+    const week = journal.weeks[wi];
+    for (let di = 0; di < week.days.length; di++) {
+      const day = week.days[di];
+      if ((day.id ?? `day-${day.day}`) === id) {
+        return { weekIdx: wi, dayIdx: di };
+      }
+    }
+  }
+  return null;
+}
+
 /**
- * Error response helper
+ * Derive a week number + period string from a date.
+ * We bin dates by ISO week number and create a human label like "May 6-7, 2026".
+ * For simplicity, new entries are appended to the last week if within the same
+ * calendar week, otherwise a brand-new week block is created.
  */
+function getOrCreateWeekForDate(journal: JournalData, date: string): JournalWeek {
+  const [y, m, d] = date.split("-").map(Number);
+  const target = new Date(y, m - 1, d);
+
+  // Walk backwards to find a week block whose period overlaps target date
+  for (let wi = journal.weeks.length - 1; wi >= 0; wi--) {
+    const week = journal.weeks[wi];
+    if (week.days.length === 0) continue;
+    // Check if any existing day in this week is within 6 days of target
+    for (const day of week.days) {
+      const [dy, dm, dd] = day.date.split("-").map(Number);
+      const diff = Math.abs(target.getTime() - new Date(dy, dm - 1, dd).getTime());
+      const diffDays = diff / (1000 * 60 * 60 * 24);
+      if (diffDays <= 6) return week; // same calendar week
+    }
+  }
+
+  // Create a new week block
+  const weekNum = journal.weeks.length > 0
+    ? Math.max(...journal.weeks.map((w) => w.week)) + 1
+    : 1;
+  const label = target.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+  const newWeek: JournalWeek = {
+    week: weekNum,
+    period: label,
+    days: [],
+    totalHours: 0,
+  };
+  journal.weeks.push(newWeek);
+  return newWeek;
+}
+
+/** Error response helper */
 function sendError(res: Response, statusCode: number, errors: string[]) {
   res.status(statusCode).json({
     success: false,
@@ -133,15 +225,13 @@ app.get("/health", (_req: Request, res: Response) => {
 
 /**
  * GET /api/entries
- * Returns all entries from the journal
+ * Returns all log entries flattened from the week-based JSON structure.
  */
 app.get("/api/entries", (_req: Request, res: Response) => {
   try {
     const journal = readJournal();
-    res.json({
-      success: true,
-      data: journal.entries || [],
-    });
+    const entries = flattenEntries(journal);
+    res.json({ success: true, data: entries });
   } catch (error) {
     console.error("Error fetching entries:", error);
     sendError(res, 500, ["Failed to fetch entries"]);
@@ -150,39 +240,70 @@ app.get("/api/entries", (_req: Request, res: Response) => {
 
 /**
  * POST /api/entries
- * Adds a new entry to the journal
- * @body {LogEntry} entry - The entry to add
+ * Adds a new entry to journalData.json.
+ * Appends to the appropriate week block (or creates a new one).
+ *
+ * Body: { date, startTime, endTime, hoursWorked, activity, isHoliday, day? }
  */
 app.post("/api/entries", (req: Request, res: Response) => {
   try {
-    // Validate input
     const validation = validateLogEntry(req.body);
     if (!validation.valid) {
       return sendError(res, 400, validation.errors);
     }
 
     const journal = readJournal();
-    const newEntry: LogEntry = {
-      id: `log-${Date.now()}`,
-      ...req.body,
-      createdAt: new Date().toISOString(),
+    const allEntries = flattenEntries(journal);
+
+    // Auto-assign day number
+    const maxDay = allEntries.length > 0
+      ? Math.max(...allEntries.map((e) => e.day))
+      : 0;
+    const dayNumber = (typeof req.body.day === "number" && req.body.day > 0)
+      ? req.body.day
+      : maxDay + 1;
+
+    const id = `log-${Date.now()}`;
+    const createdAt = new Date().toISOString();
+
+    const newDay: JournalDay = {
+      id,
+      day: dayNumber,
+      date: req.body.date,
+      startTime: req.body.startTime ?? "08:00",
+      endTime: req.body.endTime ?? "17:00",
+      hoursWorked: req.body.hoursWorked ?? 0,
+      activities: [req.body.activity.trim()],
+      isHoliday: Boolean(req.body.isHoliday),
+      createdAt,
     };
 
-    // Auto-assign day number if not provided
-    if (!newEntry.day) {
-      const maxDay = journal.entries.length > 0
-        ? Math.max(...journal.entries.map((e: LogEntry) => e.day || 0))
-        : 0;
-      newEntry.day = maxDay + 1;
-    }
+    // Find or create the week block for this date
+    const week = getOrCreateWeekForDate(journal, req.body.date);
+    week.days.push(newDay);
+    // Sort days within the week by date
+    week.days.sort((a, b) => a.date.localeCompare(b.date));
+    // Recompute week total
+    week.totalHours = parseFloat(
+      week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0).toFixed(2)
+    );
 
-    journal.entries.push(newEntry);
     writeJournal(journal);
 
-    res.status(201).json({
-      success: true,
-      data: newEntry,
-    });
+    // Return the flat LogEntry shape the frontend expects
+    const newEntry: LogEntry = {
+      id,
+      day: dayNumber,
+      date: newDay.date,
+      startTime: newDay.startTime,
+      endTime: newDay.endTime,
+      hoursWorked: newDay.hoursWorked,
+      activity: req.body.activity.trim(),
+      isHoliday: newDay.isHoliday,
+      createdAt,
+    };
+
+    res.status(201).json({ success: true, data: newEntry });
   } catch (error) {
     console.error("Error adding entry:", error);
     sendError(res, 500, ["Failed to add entry"]);
@@ -191,47 +312,58 @@ app.post("/api/entries", (req: Request, res: Response) => {
 
 /**
  * PUT /api/entries/:id
- * Updates an existing entry by ID
- * @param {string} id - The entry ID
- * @body {Partial<LogEntry>} updates - Fields to update
+ * Updates an existing entry by ID.
  */
 app.put("/api/entries/:id", (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
-    if (!id || typeof id !== "string") {
-      return sendError(res, 400, ["Invalid entry ID"]);
-    }
-
-    // Validate only provided fields
-    if (Object.keys(req.body).length > 0) {
-      const validation = validateLogEntry(req.body);
-      if (!validation.valid) {
-        return sendError(res, 400, validation.errors);
-      }
-    }
+    if (!id) return sendError(res, 400, ["Invalid entry ID"]);
 
     const journal = readJournal();
-    const entryIndex = journal.entries.findIndex((e: LogEntry) => e.id === id);
+    const location = findDay(journal, id);
+    if (!location) return sendError(res, 404, ["Entry not found"]);
 
-    if (entryIndex === -1) {
-      return sendError(res, 404, ["Entry not found"]);
-    }
+    const { weekIdx, dayIdx } = location;
+    const existing = journal.weeks[weekIdx].days[dayIdx];
 
-    const updatedEntry = {
-      ...journal.entries[entryIndex],
-      ...req.body,
-      id: journal.entries[entryIndex].id, // Prevent ID modification
-      createdAt: journal.entries[entryIndex].createdAt, // Preserve creation time
-    };
+    // Merge patch
+    const patch = req.body as Partial<{
+      date: string;
+      startTime: string;
+      endTime: string;
+      hoursWorked: number;
+      activity: string;
+      isHoliday: boolean;
+    }>;
 
-    journal.entries[entryIndex] = updatedEntry;
+    if (patch.date !== undefined) existing.date = patch.date;
+    if (patch.startTime !== undefined) existing.startTime = patch.startTime;
+    if (patch.endTime !== undefined) existing.endTime = patch.endTime;
+    if (patch.hoursWorked !== undefined) existing.hoursWorked = patch.hoursWorked;
+    if (patch.activity !== undefined) existing.activities = [patch.activity.trim()];
+    if (patch.isHoliday !== undefined) existing.isHoliday = patch.isHoliday;
+
+    // Recompute week total
+    const week = journal.weeks[weekIdx];
+    week.totalHours = parseFloat(
+      week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0).toFixed(2)
+    );
+
     writeJournal(journal);
 
-    res.json({
-      success: true,
-      data: updatedEntry,
-    });
+    const updated: LogEntry = {
+      id: existing.id ?? id,
+      day: existing.day,
+      date: existing.date,
+      startTime: existing.startTime,
+      endTime: existing.endTime,
+      hoursWorked: existing.hoursWorked,
+      activity: existing.activities.join("; "),
+      isHoliday: existing.isHoliday ?? false,
+      createdAt: existing.createdAt,
+    };
+
+    res.json({ success: true, data: updated });
   } catch (error) {
     console.error("Error updating entry:", error);
     sendError(res, 500, ["Failed to update entry"]);
@@ -240,30 +372,37 @@ app.put("/api/entries/:id", (req: Request, res: Response) => {
 
 /**
  * DELETE /api/entries/:id
- * Deletes an entry by ID
- * @param {string} id - The entry ID
+ * Deletes an entry by ID.
  */
 app.delete("/api/entries/:id", (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-
-    if (!id || typeof id !== "string") {
-      return sendError(res, 400, ["Invalid entry ID"]);
-    }
+    if (!id) return sendError(res, 400, ["Invalid entry ID"]);
 
     const journal = readJournal();
-    const entryIndex = journal.entries.findIndex((e: LogEntry) => e.id === id);
+    const location = findDay(journal, id);
+    if (!location) return sendError(res, 404, ["Entry not found"]);
 
-    if (entryIndex === -1) {
-      return sendError(res, 404, ["Entry not found"]);
-    }
+    const { weekIdx, dayIdx } = location;
+    const [deleted] = journal.weeks[weekIdx].days.splice(dayIdx, 1);
 
-    const [deleted] = journal.entries.splice(entryIndex, 1);
+    // Recompute week total
+    const week = journal.weeks[weekIdx];
+    week.totalHours = parseFloat(
+      week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0).toFixed(2)
+    );
+
     writeJournal(journal);
 
     res.json({
       success: true,
-      data: deleted,
+      data: {
+        id: deleted.id ?? id,
+        day: deleted.day,
+        date: deleted.date,
+        activity: deleted.activities?.join("; ") ?? "",
+        hoursWorked: deleted.hoursWorked,
+      },
     });
   } catch (error) {
     console.error("Error deleting entry:", error);
@@ -272,7 +411,7 @@ app.delete("/api/entries/:id", (req: Request, res: Response) => {
 });
 
 /**
- * Error handler for 404
+ * 404 fallback
  */
 app.use((_req: Request, res: Response) => {
   sendError(res, 404, ["Endpoint not found"]);
@@ -283,4 +422,5 @@ app.use((_req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
   console.log(`📁 Journal file: ${JOURNAL_PATH}`);
+  console.log(`🔌 Proxy: Vite dev server → /api/* → http://localhost:${PORT}`);
 });

@@ -1,8 +1,3 @@
-/**
- * Improved Toast Notification System
- * Replaces inline toast management in App.tsx
- */
-
 import { createContext, useContext, useCallback, type ReactNode, useState } from "react";
 import type { Toast } from "../../types";
 import { UI_CONFIG } from "../../config/constants";
