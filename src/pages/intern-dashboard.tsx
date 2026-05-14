@@ -25,27 +25,31 @@ function useInternProfile(userId: string | null) {
   useEffect(() => {
     if (!userId || !supabase) { setLoading(false); return; }
     let cancelled = false;
-    supabase.from("interns")
-      .select("id, intern_id, name, required_hours, enrolled_at, companies ( name, supervisor_name )")
-      .eq("user_id", userId).maybeSingle()
-      .then(({ data, error: err }) => {
+    (async () => {
+      try {
+        const { data, error: err } = await supabase.from("interns")
+          .select("id, intern_id, name, required_hours, enrolled_at, companies ( name, supervisor_name )")
+          .eq("user_id", userId).maybeSingle();
+        
         if (cancelled) return;
         if (err) {
-          // Real DB error — show the message
           setError(err.message);
-          setLoading(false);
           return;
         }
         if (!data) {
-          // No intern row for this user yet
           setError("Your intern profile hasn't been set up yet. Please contact your administrator.");
-          setLoading(false);
           return;
         }
         const row = data as any;
-        setProfile({ requiredHours: Number(row.required_hours), enrolledAt: row.enrolled_at, companyName: row.companies?.name ?? "—", supervisorName: row.companies?.supervisor_name ?? "—" });
-        setLoading(false);
-      });
+        const cName = row.companies && Array.isArray(row.companies) && row.companies.length > 0 ? row.companies[0].name : row.companies?.name ?? "—";
+        const cSup = row.companies && Array.isArray(row.companies) && row.companies.length > 0 ? row.companies[0].supervisor_name : row.companies?.supervisor_name ?? "—";
+        setProfile({ requiredHours: Number(row.required_hours), enrolledAt: row.enrolled_at, companyName: cName, supervisorName: cSup });
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, [userId]);
   return { profile, loading, error };

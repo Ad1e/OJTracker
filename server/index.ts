@@ -4,6 +4,17 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, "../.env") });
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const supabaseAdmin = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null;
 
 const logEntrySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
@@ -18,7 +29,6 @@ const logEntrySchema = z.object({
   { message: "startTime, endTime, and hoursWorked required for non-holiday entries" }
 );
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app: Express = express();
 const PORT = process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT) : 3001;
 
@@ -376,6 +386,70 @@ app.delete("/api/entries/:id", (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error deleting entry:", error);
     sendError(res, 500, ["Failed to delete entry"]);
+  }
+});
+
+// ─── Admin Users API (Supabase) ───────────────────────────────────────────────
+
+app.post("/api/admin/create-intern", async (req: Request, res: Response) => {
+  if (!supabaseAdmin) {
+    return res.status(500).json({ success: false, error: "SUPABASE_SERVICE_ROLE_KEY is not set in .env" });
+  }
+
+  const { full_name, email, password, intern_id, required_hours, company_id, enrolled_at } = req.body;
+  if (!email || !password || !full_name || !required_hours || !company_id) {
+    return res.status(400).json({ success: false, error: "Missing required fields" });
+  }
+
+  try {
+    // 1. Create auth user
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+
+    if (authError || !authData.user) {
+      throw new Error(`Auth Error: ${authError?.message || "Failed to create user"}`);
+    }
+
+    const userId = authData.user.id;
+
+    // 2. Insert profile
+    const { error: profileError } = await supabaseAdmin.from("profiles").insert({
+      id: userId,
+      email: email,
+      full_name: full_name,
+      is_admin: false,
+    });
+
+    if (profileError) {
+      // Rollback auth user if profile fails
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+      throw new Error(`Profile Error: ${profileError.message}`);
+    }
+
+    // 3. Insert intern row
+    const { error: internError } = await supabaseAdmin.from("interns").insert({
+      user_id: userId,
+      name: full_name,
+      intern_id: intern_id || `INT-${Date.now()}`,
+      required_hours: required_hours,
+      company_id: company_id,
+      enrolled_at: enrolled_at || new Date().toISOString().slice(0, 10),
+    });
+
+    if (internError) {
+      // Attempt rollback (best effort)
+      await supabaseAdmin.from("profiles").delete().eq("id", userId);
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+      throw new Error(`Intern Error: ${internError.message}`);
+    }
+
+    return res.status(201).json({ success: true, user: authData.user });
+  } catch (err) {
+    console.error("Create intern error:", err);
+    return res.status(500).json({ success: false, error: err instanceof Error ? err.message : String(err) });
   }
 });
 

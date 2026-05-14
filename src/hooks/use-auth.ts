@@ -73,39 +73,68 @@ export function useAuth(): AuthState {
 
     let mounted = true;
 
-    // ── Safety net: never spin longer than 5 seconds ──────────────────────
+    // ── Safety net: never spin longer than 2 seconds ──────────────────────
+    console.log("[useAuth] Setting safety timeout...");
     const timeout = setTimeout(() => {
+      console.log("[useAuth] Safety timeout fired!");
       if (mounted) setLoading(false);
-    }, 5000);
+    }, 2000);
 
     // ── Phase 1: instant local session read (no network) ──────────────────
-    // getSession() resolves from localStorage on the same tick.
-    // We resolve loading here so the spinner disappears immediately.
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      clearTimeout(timeout);
-      setLoading(false); // ← spinner gone as soon as session is known
-
-      // Fetch profile in the background — doesn't block the UI
-      if (currentUser) {
-        const p = await fetchProfile(currentUser.id);
+    console.log("[useAuth] Starting getSession()");
+    
+    // We race getSession against a 1-second timer because sometimes Supabase 
+    // hangs trying to refresh an expired token on a slow/sleeping project.
+    Promise.race([
+      supabase.auth.getSession(),
+      new Promise<{ data: { session: null }, error: Error }>((_, reject) => 
+        setTimeout(() => reject(new Error("getSession timeout")), 1500)
+      )
+    ])
+      .then(async ({ data: { session }, error }: any) => {
+        console.log("[useAuth] getSession() resolved. Error:", error, "Session:", !!session);
         if (!mounted) return;
-        setProfile(p);
-        setIsAdmin(p?.is_admin ?? false);
-      }
-    });
+        if (error) {
+          console.error("Auth session error:", error);
+        }
+
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        clearTimeout(timeout);
+        setLoading(false); // ← spinner gone as soon as session is known
+
+        // Fetch profile in the background — doesn't block the UI
+        if (currentUser) {
+          try {
+            const p = await fetchProfile(currentUser.id);
+            if (!mounted) return;
+            setProfile(p);
+            setIsAdmin(p?.is_admin ?? false);
+          } catch (e) {
+            console.error("Profile fetch error:", e);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Auth getSession exception:", err);
+        if (mounted) {
+          clearTimeout(timeout);
+          setLoading(false);
+        }
+      });
 
     // ── Phase 2: listen for future auth events ────────────────────────────
     // INITIAL_SESSION is skipped (already handled by getSession above).
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("[useAuth] onAuthStateChange event:", event);
         if (!mounted) return;
 
         // Skip INITIAL_SESSION — it duplicates Phase 1
-        if (event === "INITIAL_SESSION") return;
+        if (event === "INITIAL_SESSION") {
+           console.log("[useAuth] Skipping INITIAL_SESSION");
+           return;
+        }
 
         const currentUser = session?.user ?? null;
         setUser(currentUser);

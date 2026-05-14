@@ -115,16 +115,22 @@ export function useEntries(overrideUserId?: string | null): UseEntriesReturn {
 
     if (userId) query = query.eq("user_id", userId);
 
-    query.then(({ data, error: err }) => {
-      if (!mounted) return;
-      if (err) {
-        setError(err.message);
-      } else {
-        setEntries((data ?? []).map(toLogEntry));
-        setError(null);
+    (async () => {
+      try {
+        const { data, error: err } = await query;
+        if (!mounted) return;
+        if (err) {
+          setError(err.message);
+        } else {
+          setEntries((data ?? []).map(toLogEntry));
+          setError(null);
+        }
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
-    });
+    })();
 
     return () => { mounted = false; };
   }, [userId]);

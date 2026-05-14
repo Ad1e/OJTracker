@@ -13,10 +13,10 @@ import { useState, useMemo, useCallback } from "react";
 import { useNavigate }                    from "react-router-dom";
 import { useAuthContext }                 from "../context/auth-context";
 import {
-  useAdmin, useCompanies, useUnregisteredProfiles, registerIntern,
+  useAdmin, useCompanies,
 }                                         from "../hooks/use-admin";
 import type {
-  InternSummary, InternStatus, Company, RegisterInternPayload,
+  InternSummary, InternStatus, Company,
 }                                         from "../hooks/use-admin";
 
 // ─── Reusable UI pieces ───────────────────────────────────────────────────────
@@ -81,11 +81,11 @@ interface RegisterModalProps {
 }
 
 function RegisterInternModal({ onClose, onSuccess }: RegisterModalProps) {
-  const { profiles, loading: profilesLoading } = useUnregisteredProfiles();
   const { companies, loading: companiesLoading, createCompany } = useCompanies();
 
   // form state
-  const [userId,        setUserId]        = useState("");
+  const [email,         setEmail]         = useState("");
+  const [password,      setPassword]      = useState("");
   const [name,          setName]          = useState("");
   const [schoolId,      setSchoolId]      = useState("");
   const [requiredHours, setRequiredHours] = useState(500);
@@ -102,13 +102,6 @@ function RegisterInternModal({ onClose, onSuccess }: RegisterModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error,      setError]      = useState<string | null>(null);
 
-  // Auto-fill name from profile selection
-  const handleUserChange = useCallback((id: string) => {
-    setUserId(id);
-    const found = profiles.find((p) => p.id === id);
-    if (found) setName(found.full_name || found.email.split("@")[0]);
-  }, [profiles]);
-
   const handleCreateCompany = useCallback(async () => {
     if (!newCompanyName.trim()) return;
     const c = await createCompany({
@@ -124,14 +117,37 @@ function RegisterInternModal({ onClose, onSuccess }: RegisterModalProps) {
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId || !companyId) { setError("Please select a user and a company."); return; }
+    if (!companyId) { setError("Please select or create a company."); return; }
+    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    
     setSubmitting(true);
     setError(null);
-    const payload: RegisterInternPayload = { userId, name, schoolId, requiredHours, enrolledAt, companyId };
-    const { error: err } = await registerIntern(payload);
-    if (err) { setError(err); setSubmitting(false); return; }
-    onSuccess();
-  }, [userId, name, schoolId, requiredHours, enrolledAt, companyId, onSuccess]);
+    
+    try {
+      const res = await fetch("/api/admin/create-intern", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: name,
+          email,
+          password,
+          intern_id: schoolId,
+          required_hours: requiredHours,
+          company_id: companyId,
+          enrolled_at: enrolledAt,
+        }),
+      });
+      
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Failed to create intern");
+      }
+      onSuccess();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setSubmitting(false);
+    }
+  }, [name, email, password, schoolId, requiredHours, companyId, enrolledAt, onSuccess]);
 
   return (
     <div
@@ -153,38 +169,22 @@ function RegisterInternModal({ onClose, onSuccess }: RegisterModalProps) {
         {/* How it works banner */}
         <div className="px-6 py-3 bg-indigo-500/5 border-b border-indigo-500/10">
           <p className="text-xs text-indigo-300/80 leading-relaxed">
-            <span className="font-semibold text-indigo-300">How it works:</span>{" "}
-            The intern must first sign up at <span className="font-mono text-indigo-200">/login</span>. Then select their
-            account below, fill in the details, and click Register. They'll immediately be able to log in and see their dashboard.
+            <span className="font-semibold text-indigo-300">Note:</span>{" "}
+            This requires <span className="font-mono text-indigo-200">SUPABASE_SERVICE_ROLE_KEY</span> in the backend <span className="font-mono text-indigo-200">.env</span> file. Make sure your local Express server is running.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
 
-          {/* User picker */}
-          <Field label="User account">
-            {profilesLoading ? (
-              <div className="text-xs text-slate-500 py-2">Loading users…</div>
-            ) : profiles.length === 0 ? (
-              <div className="text-xs text-amber-400 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3">
-                No unregistered users found. All signed-up users already have intern profiles, or no one has signed up yet.
-              </div>
-            ) : (
-              <select
-                value={userId}
-                onChange={(e) => handleUserChange(e.target.value)}
-                className={inputCls}
-                required
-              >
-                <option value="">Select a user…</option>
-                {profiles.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.full_name ? `${p.full_name} (${p.email})` : p.email}
-                  </option>
-                ))}
-              </select>
-            )}
-          </Field>
+          {/* Email + Password */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Email Address">
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="intern@example.com" required />
+            </Field>
+            <Field label="Password">
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} placeholder="min 6 chars" required minLength={6} />
+            </Field>
+          </div>
 
           {/* Name */}
           <Field label="Full name">
@@ -271,10 +271,10 @@ function RegisterInternModal({ onClose, onSuccess }: RegisterModalProps) {
             <button
               id="register-intern-submit"
               type="submit"
-              disabled={submitting || profiles.length === 0}
+              disabled={submitting}
               className="flex-1 py-2.5 rounded-xl bg-accent text-white text-sm font-bold hover:bg-indigo-400 disabled:opacity-50 transition shadow-[0_0_15px_rgba(99,102,241,0.3)]"
             >
-              {submitting ? "Registering…" : "Register Intern"}
+              {submitting ? "Registering…" : "Add Intern"}
             </button>
           </div>
         </form>
