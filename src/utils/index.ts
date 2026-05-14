@@ -39,6 +39,18 @@ function escapeRegex(str: string): string {
 // ─── Date/Time Utilities ────────────────────────────────────────────
 
 /**
+ * Convert "HH:MM" 24-hour time to "h:MM AM/PM" for display labels.
+ * @example to12h("13:30") → "1:30 PM"
+ */
+export function to12h(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  if (isNaN(h) || isNaN(m)) return time;
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+/**
  * Format date string for display
  * @example formatDate("2026-04-30") → "Apr 30, 2026"
  */

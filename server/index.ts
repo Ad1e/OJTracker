@@ -3,6 +3,20 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { z } from "zod";
+
+const logEntrySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
+  startTime: z.string().regex(/^([0-1]\d|2[0-3]):[0-5]\d$/).optional(),
+  endTime: z.string().regex(/^([0-1]\d|2[0-3]):[0-5]\d$/).optional(),
+  hoursWorked: z.number().min(0).max(24).optional(),
+  activity: z.string().min(3).max(500),
+  isHoliday: z.boolean().optional().default(false),
+  day: z.number().positive().optional(),
+}).refine(
+  (data) => data.isHoliday || (data.startTime && data.endTime && data.hoursWorked !== undefined),
+  { message: "startTime, endTime, and hoursWorked required for non-holiday entries" }
+);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app: Express = express();
@@ -57,53 +71,6 @@ interface JournalData {
   course: string;
   supervisor: string;
   weeks: JournalWeek[];
-}
-
-interface ValidationResult {
-  valid: boolean;
-  errors: string[];
-}
-
-// ─── Validation ──────────────────────────────────────────────────────────────
-
-function isValidTimeFormat(time: string): boolean {
-  // Accept HH:mm (24h) or "hh:mm AM/PM" (12h legacy)
-  return /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(time) ||
-    /^\d{1,2}:\d{2}\s?(AM|PM)$/i.test(time);
-}
-
-function validateLogEntry(data: unknown): ValidationResult {
-  const errors: string[] = [];
-
-  if (!data || typeof data !== "object") {
-    return { valid: false, errors: ["Entry must be an object"] };
-  }
-
-  const entry = data as Record<string, unknown>;
-
-  if (typeof entry.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) {
-    errors.push("date must be in YYYY-MM-DD format");
-  }
-
-  const isHoliday = Boolean(entry.isHoliday);
-
-  if (!isHoliday) {
-    if (!isValidTimeFormat(entry.startTime as string)) {
-      errors.push("startTime must be in HH:mm or hh:mm AM/PM format");
-    }
-    if (!isValidTimeFormat(entry.endTime as string)) {
-      errors.push("endTime must be in HH:mm or hh:mm AM/PM format");
-    }
-    if (typeof entry.hoursWorked !== "number" || entry.hoursWorked < 0 || entry.hoursWorked > 24) {
-      errors.push("hoursWorked must be a number between 0 and 24");
-    }
-  }
-
-  if (typeof entry.activity !== "string" || entry.activity.trim().length < 3 || entry.activity.length > 500) {
-    errors.push("activity must be a string between 3 and 500 characters");
-  }
-
-  return { valid: errors.length === 0, errors };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -299,7 +266,7 @@ app.post("/api/entries", (req: Request, res: Response) => {
       endTime: newDay.endTime,
       hoursWorked: newDay.hoursWorked,
       activity: req.body.activity.trim(),
-      isHoliday: newDay.isHoliday,
+      isHoliday: newDay.isHoliday ?? false,
       createdAt,
     };
 
@@ -316,7 +283,8 @@ app.post("/api/entries", (req: Request, res: Response) => {
  */
 app.put("/api/entries/:id", (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params["id"];
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!id) return sendError(res, 400, ["Invalid entry ID"]);
 
     const journal = readJournal();
@@ -376,7 +344,8 @@ app.put("/api/entries/:id", (req: Request, res: Response) => {
  */
 app.delete("/api/entries/:id", (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const rawId = req.params["id"];
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
     if (!id) return sendError(res, 400, ["Invalid entry ID"]);
 
     const journal = readJournal();

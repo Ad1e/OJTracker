@@ -1,9 +1,9 @@
-/**
- * Central type definitions for OJTracker
- * All domain types should be defined here to avoid circular imports
- */
+// ─── src/types/index.ts ───────────────────────────────────────────────────────
+// Single source of truth for ALL shared domain types.
+// Local-only types (e.g. SortState inside a table component) stay in their file.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ─── Log Entry Types ───────────────────────────────────────────────────────
+// ─── Core domain ──────────────────────────────────────────────────────────────
 
 export interface LogEntry {
   id: string;
@@ -17,6 +17,19 @@ export interface LogEntry {
   createdAt?: string;
 }
 
+/** Raw shape of a row returned by supabase.from("log_entries").select("*"). */
+export interface LogEntryRow {
+  id: string;
+  day: number;
+  date: string;
+  start_time: string | null;
+  end_time: string | null;
+  hours_worked: number | string;
+  activity: string;
+  is_holiday: boolean | null;
+  created_at?: string | null;
+}
+
 export interface HoursCalcResult {
   totalRendered: number;
   remaining: number;
@@ -27,29 +40,33 @@ export interface HoursCalcResult {
   holidayCount: number;
 }
 
-// ─── Profile Types ────────────────────────────────────────────────────────
+// ─── Profile ──────────────────────────────────────────────────────────────────
 
 export interface TraineeProfileData {
   name: string;
-  companyName: string;
-  startDate: string;
+  department: string;
+  supervisor: string;
+  school: string;
   totalRequiredHours: number;
-  department?: string;
-  supervisor?: string;
+  avatarDataUrl: string | null;
+  startDate: string;
 }
 
-// ─── UI State Types ──────────────────────────────────────────────────────
+// ─── Form ─────────────────────────────────────────────────────────────────────
+
+export type FormMode = "add" | "edit";
+
+// ─── UI state ─────────────────────────────────────────────────────────────────
 
 export interface Toast {
   id: number;
   message: string;
   type: "success" | "edit" | "error";
-  autoClose?: boolean; // true for success/edit (3s), false for error (persistent)
 }
 
 export interface ModalState {
   isOpen: boolean;
-  mode: "add" | "edit";
+  mode: FormMode;
   target: LogEntry | null;
 }
 
@@ -58,7 +75,7 @@ export interface DeleteConfirmState {
   target: LogEntry | null;
 }
 
-// ─── API Response Types ──────────────────────────────────────────────────
+// ─── API ──────────────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -78,7 +95,7 @@ export interface UseEntriesReturn {
   deleteEntry: (id: string) => Promise<boolean>;
 }
 
-// ─── Error Types ───────────────────────────────────────────────────────
+// ─── Errors ───────────────────────────────────────────────────────────────────
 
 export interface AppError {
   code: string;
@@ -88,7 +105,6 @@ export interface AppError {
 
 export class ValidationError extends Error {
   field: string;
-  
   constructor(field: string, message: string) {
     super(message);
     this.field = field;
@@ -99,15 +115,38 @@ export class ValidationError extends Error {
 export class NetworkError extends Error {
   statusCode?: number;
   retryable: boolean;
-
-  constructor(
-    message: string,
-    statusCode?: number,
-    retryable: boolean = true
-  ) {
+  constructor(message: string, statusCode?: number, retryable = true) {
     super(message);
     this.statusCode = statusCode;
     this.retryable = retryable;
     this.name = "NetworkError";
   }
+}
+
+// ─── Journal (local JSON shape — used by HoursSummary and server) ─────────────
+
+export interface JournalDay {
+  day: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  hoursWorked: number;
+  activities: string[];
+  isHoliday?: boolean;
+  id?: string;
+  createdAt?: string;
+}
+
+export interface JournalWeek {
+  week: number;
+  period: string;
+  days: JournalDay[];
+  totalHours: number;
+}
+
+export interface JournalData {
+  trainee: string;
+  course: string;
+  supervisor: string;
+  weeks: JournalWeek[];
 }
