@@ -6,6 +6,10 @@ import { fileURLToPath } from "url";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
+import Decimal from "decimal.js";
+import { authenticateToken, generateDevToken } from "./auth.js";
+import type { AuthRequest } from "./auth.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "../.env") });
@@ -34,10 +38,44 @@ const PORT = process.env.SERVER_PORT ? parseInt(process.env.SERVER_PORT) : 3001;
 
 const JOURNAL_PATH = path.join(__dirname, "../src/data/journalData.json");
 
+// ─── Rate Limiting (Fix #2) ──────────────────────────────────────────────────
+
+/** General rate limiter: 100 requests per 15 minutes */
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for health checks (useful for monitoring)
+    return req.path === "/health";
+  },
+});
+
+/** Write operations limiter: 50 requests per 15 minutes (more restrictive) */
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: "Too many write operations, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/** Dev token endpoint limiter: 5 requests per hour (prevent token spam) */
+const devTokenLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: "Too many token requests, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // ─── Middleware ──────────────────────────────────────────────────────────────
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+app.use(generalLimiter);  // Apply general rate limiting globally
 
 // ─── Type Definitions ────────────────────────────────────────────────────────
 
@@ -201,193 +239,269 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/dev-token (Development only)
+ * Generate a JWT token for testing without Supabase Auth.
+ * Only available when VITE_SUPABASE_URL is not configured.
+ */
+if (!supabaseAdmin) {
+  app.post(
+    "/api/dev-token",
+    devTokenLimiter,
+    (_req: AuthRequest, res: Response) => {
+      const token = generateDevToken("dev-user-" + Date.now(), "dev@ojtracker.local");
+      res.json({
+        success: true,
+        token,
+        expiresIn: "7d",
+        message: "Development token generated (valid for 7 days)",
+      });
+    }
+  );
+}
+
+/**
  * GET /api/entries
  * Returns all log entries flattened from the week-based JSON structure.
+ * When using fallback mode (no Supabase), requires JWT authentication.
  */
-app.get("/api/entries", (_req: Request, res: Response) => {
-  try {
-    const journal = readJournal();
-    const entries = flattenEntries(journal);
-    res.json({ success: true, data: entries });
-  } catch (error) {
-    console.error("Error fetching entries:", error);
-    sendError(res, 500, ["Failed to fetch entries"]);
+app.get(
+  "/api/entries",
+  // Apply auth middleware only in fallback mode (when Supabase is not available)
+  (req: AuthRequest, res: Response, next) => {
+    if (!supabaseAdmin) {
+      authenticateToken(req, res, next);
+    } else {
+      next();
+    }
+  },
+  (_req: AuthRequest, res: Response) => {
+    try {
+      const journal = readJournal();
+      const entries = flattenEntries(journal);
+      res.json({ success: true, data: entries });
+    } catch (error) {
+      console.error("Error fetching entries:", error);
+      sendError(res, 500, ["Failed to fetch entries"]);
+    }
   }
-});
+);
 
 /**
  * POST /api/entries
  * Adds a new entry to journalData.json.
  * Appends to the appropriate week block (or creates a new one).
+ * Rate limited for write operations.
  *
  * Body: { date, startTime, endTime, hoursWorked, activity, isHoliday, day? }
  */
-app.post("/api/entries", (req: Request, res: Response) => {
-  try {
-    const parsed = logEntrySchema.safeParse(req.body);
-    if (!parsed.success) {
-      return sendError(res, 400, parsed.error.issues.map((issue: z.ZodIssue) => issue.message));
+app.post(
+  "/api/entries",
+  writeLimiter,  // Apply write rate limiting (Fix #2)
+  // Apply auth middleware only in fallback mode (Fix #3)
+  (req: AuthRequest, res: Response, next) => {
+    if (!supabaseAdmin) {
+      authenticateToken(req, res, next);
+    } else {
+      next();
     }
+  },
+  (req: AuthRequest, res: Response) => {
+    try {
+      const parsed = logEntrySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return sendError(res, 400, parsed.error.issues.map((issue: z.ZodIssue) => issue.message));
+      }
 
-    const journal = readJournal();
-    const allEntries = flattenEntries(journal);
+      const journal = readJournal();
+      const allEntries = flattenEntries(journal);
 
-    // Auto-assign day number
-    const maxDay = allEntries.length > 0
-      ? Math.max(...allEntries.map((e) => e.day))
-      : 0;
-    const dayNumber = (typeof req.body.day === "number" && req.body.day > 0)
-      ? req.body.day
-      : maxDay + 1;
+      // Auto-assign day number
+      const maxDay = allEntries.length > 0
+        ? Math.max(...allEntries.map((e) => e.day))
+        : 0;
+      const dayNumber = (typeof req.body.day === "number" && req.body.day > 0)
+        ? req.body.day
+        : maxDay + 1;
 
-    const id = `log-${Date.now()}`;
-    const createdAt = new Date().toISOString();
+      const id = `log-${Date.now()}`;
+      const createdAt = new Date().toISOString();
 
-    const newDay: JournalDay = {
-      id,
-      day: dayNumber,
-      date: req.body.date,
-      startTime: req.body.startTime ?? "08:00",
-      endTime: req.body.endTime ?? "17:00",
-      hoursWorked: req.body.hoursWorked ?? 0,
-      activities: [req.body.activity.trim()],
-      isHoliday: Boolean(req.body.isHoliday),
-      createdAt,
-    };
+      const newDay: JournalDay = {
+        id,
+        day: dayNumber,
+        date: req.body.date,
+        startTime: req.body.startTime ?? "08:00",
+        endTime: req.body.endTime ?? "17:00",
+        hoursWorked: req.body.hoursWorked ?? 0,
+        activities: [req.body.activity.trim()],
+        isHoliday: Boolean(req.body.isHoliday),
+        createdAt,
+      };
 
-    // Find or create the week block for this date
-    const week = getOrCreateWeekForDate(journal, req.body.date);
-    week.days.push(newDay);
-    // Sort days within the week by date
-    week.days.sort((a, b) => a.date.localeCompare(b.date));
-    // Recompute week total
-    week.totalHours = parseFloat(
-      week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0).toFixed(2)
-    );
+      // Find or create the week block for this date
+      const week = getOrCreateWeekForDate(journal, req.body.date);
+      week.days.push(newDay);
+      // Sort days within the week by date
+      week.days.sort((a, b) => a.date.localeCompare(b.date));
+      
+      // Recompute week total with Decimal precision (Fix #5)
+      const weekTotal = new Decimal(
+        week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0)
+      ).toDecimalPlaces(2);
+      week.totalHours = weekTotal.toNumber();
 
-    writeJournal(journal);
+      writeJournal(journal);
 
-    // Return the flat LogEntry shape the frontend expects
-    const newEntry: LogEntry = {
-      id,
-      day: dayNumber,
-      date: newDay.date,
-      startTime: newDay.startTime,
-      endTime: newDay.endTime,
-      hoursWorked: newDay.hoursWorked,
-      activity: req.body.activity.trim(),
-      isHoliday: newDay.isHoliday ?? false,
-      createdAt,
-    };
+      // Return the flat LogEntry shape the frontend expects
+      const newEntry: LogEntry = {
+        id,
+        day: dayNumber,
+        date: newDay.date,
+        startTime: newDay.startTime,
+        endTime: newDay.endTime,
+        hoursWorked: newDay.hoursWorked,
+        activity: req.body.activity.trim(),
+        isHoliday: newDay.isHoliday ?? false,
+        createdAt,
+      };
 
-    res.status(201).json({ success: true, data: newEntry });
-  } catch (error) {
-    console.error("Error adding entry:", error);
-    sendError(res, 500, ["Failed to add entry"]);
+      res.status(201).json({ success: true, data: newEntry });
+    } catch (error) {
+      console.error("Error adding entry:", error);
+      sendError(res, 500, ["Failed to add entry"]);
+    }
   }
-});
+);
 
 /**
  * PUT /api/entries/:id
  * Updates an existing entry by ID.
+ * Rate limited for write operations.
  */
-app.put("/api/entries/:id", (req: Request, res: Response) => {
-  try {
-    const rawId = req.params["id"];
-    const id = Array.isArray(rawId) ? rawId[0] : rawId;
-    if (!id) return sendError(res, 400, ["Invalid entry ID"]);
+app.put(
+  "/api/entries/:id",
+  writeLimiter,  // Apply write rate limiting (Fix #2)
+  // Apply auth middleware only in fallback mode (Fix #3)
+  (req: AuthRequest, res: Response, next) => {
+    if (!supabaseAdmin) {
+      authenticateToken(req, res, next);
+    } else {
+      next();
+    }
+  },
+  (req: AuthRequest, res: Response) => {
+    try {
+      const rawId = req.params["id"];
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!id) return sendError(res, 400, ["Invalid entry ID"]);
 
-    const journal = readJournal();
-    const location = findDay(journal, id);
-    if (!location) return sendError(res, 404, ["Entry not found"]);
+      const journal = readJournal();
+      const location = findDay(journal, id);
+      if (!location) return sendError(res, 404, ["Entry not found"]);
 
-    const { weekIdx, dayIdx } = location;
-    const existing = journal.weeks[weekIdx].days[dayIdx];
+      const { weekIdx, dayIdx } = location;
+      const existing = journal.weeks[weekIdx].days[dayIdx];
 
-    // Merge patch
-    const patch = req.body as Partial<{
-      date: string;
-      startTime: string;
-      endTime: string;
-      hoursWorked: number;
-      activity: string;
-      isHoliday: boolean;
-    }>;
+      // Merge patch
+      const patch = req.body as Partial<{
+        date: string;
+        startTime: string;
+        endTime: string;
+        hoursWorked: number;
+        activity: string;
+        isHoliday: boolean;
+      }>;
 
-    if (patch.date !== undefined) existing.date = patch.date;
-    if (patch.startTime !== undefined) existing.startTime = patch.startTime;
-    if (patch.endTime !== undefined) existing.endTime = patch.endTime;
-    if (patch.hoursWorked !== undefined) existing.hoursWorked = patch.hoursWorked;
-    if (patch.activity !== undefined) existing.activities = [patch.activity.trim()];
-    if (patch.isHoliday !== undefined) existing.isHoliday = patch.isHoliday;
+      if (patch.date !== undefined) existing.date = patch.date;
+      if (patch.startTime !== undefined) existing.startTime = patch.startTime;
+      if (patch.endTime !== undefined) existing.endTime = patch.endTime;
+      if (patch.hoursWorked !== undefined) existing.hoursWorked = patch.hoursWorked;
+      if (patch.activity !== undefined) existing.activities = [patch.activity.trim()];
+      if (patch.isHoliday !== undefined) existing.isHoliday = patch.isHoliday;
 
-    // Recompute week total
-    const week = journal.weeks[weekIdx];
-    week.totalHours = parseFloat(
-      week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0).toFixed(2)
-    );
+      // Recompute week total with Decimal precision (Fix #5)
+      const week = journal.weeks[weekIdx];
+      const weekTotal = new Decimal(
+        week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0)
+      ).toDecimalPlaces(2);
+      week.totalHours = weekTotal.toNumber();
 
-    writeJournal(journal);
+      writeJournal(journal);
 
-    const updated: LogEntry = {
-      id: existing.id ?? id,
-      day: existing.day,
-      date: existing.date,
-      startTime: existing.startTime,
-      endTime: existing.endTime,
-      hoursWorked: existing.hoursWorked,
-      activity: existing.activities.join("; "),
-      isHoliday: existing.isHoliday ?? false,
-      createdAt: existing.createdAt,
-    };
+      const updated: LogEntry = {
+        id: existing.id ?? id,
+        day: existing.day,
+        date: existing.date,
+        startTime: existing.startTime,
+        endTime: existing.endTime,
+        hoursWorked: existing.hoursWorked,
+        activity: existing.activities.join("; "),
+        isHoliday: existing.isHoliday ?? false,
+        createdAt: existing.createdAt,
+      };
 
-    res.json({ success: true, data: updated });
-  } catch (error) {
-    console.error("Error updating entry:", error);
-    sendError(res, 500, ["Failed to update entry"]);
+      res.json({ success: true, data: updated });
+    } catch (error) {
+      console.error("Error updating entry:", error);
+      sendError(res, 500, ["Failed to update entry"]);
+    }
   }
-});
+);
 
 /**
  * DELETE /api/entries/:id
  * Deletes an entry by ID.
+ * Rate limited for write operations.
  */
-app.delete("/api/entries/:id", (req: Request, res: Response) => {
-  try {
-    const rawId = req.params["id"];
-    const id = Array.isArray(rawId) ? rawId[0] : rawId;
-    if (!id) return sendError(res, 400, ["Invalid entry ID"]);
+app.delete(
+  "/api/entries/:id",
+  writeLimiter,  // Apply write rate limiting (Fix #2)
+  // Apply auth middleware only in fallback mode (Fix #3)
+  (req: AuthRequest, res: Response, next) => {
+    if (!supabaseAdmin) {
+      authenticateToken(req, res, next);
+    } else {
+      next();
+    }
+  },
+  (req: AuthRequest, res: Response) => {
+    try {
+      const rawId = req.params["id"];
+      const id = Array.isArray(rawId) ? rawId[0] : rawId;
+      if (!id) return sendError(res, 400, ["Invalid entry ID"]);
 
-    const journal = readJournal();
-    const location = findDay(journal, id);
-    if (!location) return sendError(res, 404, ["Entry not found"]);
+      const journal = readJournal();
+      const location = findDay(journal, id);
+      if (!location) return sendError(res, 404, ["Entry not found"]);
 
-    const { weekIdx, dayIdx } = location;
-    const [deleted] = journal.weeks[weekIdx].days.splice(dayIdx, 1);
+      const { weekIdx, dayIdx } = location;
+      const [deleted] = journal.weeks[weekIdx].days.splice(dayIdx, 1);
 
-    // Recompute week total
-    const week = journal.weeks[weekIdx];
-    week.totalHours = parseFloat(
-      week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0).toFixed(2)
-    );
+      // Recompute week total with Decimal precision (Fix #5)
+      const week = journal.weeks[weekIdx];
+      const weekTotal = new Decimal(
+        week.days.reduce((s, d) => s + (d.isHoliday ? 0 : d.hoursWorked), 0)
+      ).toDecimalPlaces(2);
+      week.totalHours = weekTotal.toNumber();
 
-    writeJournal(journal);
+      writeJournal(journal);
 
-    res.json({
-      success: true,
-      data: {
-        id: deleted.id ?? id,
-        day: deleted.day,
-        date: deleted.date,
-        activity: deleted.activities?.join("; ") ?? "",
-        hoursWorked: deleted.hoursWorked,
-      },
-    });
-  } catch (error) {
-    console.error("Error deleting entry:", error);
-    sendError(res, 500, ["Failed to delete entry"]);
+      res.json({
+        success: true,
+        data: {
+          id: deleted.id ?? id,
+          day: deleted.day,
+          date: deleted.date,
+          activity: deleted.activities?.join("; ") ?? "",
+          hoursWorked: deleted.hoursWorked,
+        },
+      });
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+      sendError(res, 500, ["Failed to delete entry"]);
+    }
   }
-});
+);
 
 // ─── Admin Users API (Supabase) ───────────────────────────────────────────────
 

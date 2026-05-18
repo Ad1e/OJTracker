@@ -1,9 +1,16 @@
 // ─── src/hooks/use-hours-calc.ts ─────────────────────────────────────────────
 // Renamed from useHoursCalc.ts. Computes all internship statistics from
 // a flat array of LogEntry records. Returns a stable, memoised HoursCalcResult.
+// Uses decimal.js for precise financial calculations (no floating-point errors).
 // ─────────────────────────────────────────────────────────────────────────────
 import { useMemo } from "react";
 import type { LogEntry, HoursCalcResult } from "../types";
+import {
+  sumDecimal,
+  averageDecimal,
+  progressPercent,
+  roundDecimal,
+} from "../utils/decimal-math";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -49,13 +56,16 @@ function addWorkdays(startDate: Date, workdays: number): Date {
 /**
  * Compute effective net hours from a 24h time range.
  * Deducts one hour for lunch break (minimum result is 0).
+ * Uses Decimal for precise calculation.
  */
 export function calcHoursWorked(startTime: string, endTime: string): number {
   const [sh, sm] = startTime.split(":").map(Number);
   const [eh, em] = endTime.split(":").map(Number);
   if (isNaN(sh) || isNaN(sm) || isNaN(eh) || isNaN(em)) return 0;
   const raw = (eh * 60 + em - (sh * 60 + sm)) / 60;
-  return Math.max(0, parseFloat((raw - 1).toFixed(2)));
+  const netHours = Math.max(0, raw - 1);
+  // Return as number but with proper rounding via Decimal
+  return roundDecimal(netHours, 2).toNumber();
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -63,6 +73,7 @@ export function calcHoursWorked(startTime: string, endTime: string): number {
 /**
  * Derives all OJT statistics from the current log entry array.
  * Fully memoised — only recomputes when `logs` or `targetHours` changes.
+ * Uses Decimal for precise calculations (no floating-point errors).
  */
 export function useHoursCalc(
   logs: LogEntry[],
@@ -72,12 +83,25 @@ export function useHoursCalc(
     const workLogs  = logs.filter((e) => !e.isHoliday && !isWeekend(e.date));
     const holidays  = logs.filter((e) => e.isHoliday);
 
-    const totalRendered   = parseFloat(workLogs.reduce((s, e) => s + e.hoursWorked, 0).toFixed(2));
-    const remaining       = parseFloat(Math.max(0, targetHours - totalRendered).toFixed(2));
-    const percentComplete = Math.min(100, Math.round((totalRendered / targetHours) * 100));
-    const avgHoursPerDay  = workLogs.length > 0
-      ? parseFloat((totalRendered / workLogs.length).toFixed(2))
-      : 0;
+    // Use Decimal for precise hour calculations
+    const totalRenderedDec = sumDecimal(workLogs.map(e => e.hoursWorked));
+    const totalRendered = totalRenderedDec.toNumber();
+    
+    const remainingDec = roundDecimal(
+      Math.max(0, targetHours - totalRendered),
+      2
+    );
+    const remaining = remainingDec.toNumber();
+    
+    const percentComplete = Math.min(
+      100,
+      progressPercent(totalRendered, targetHours).toNumber()
+    );
+    
+    const avgHoursPerDayDec = workLogs.length > 0
+      ? averageDecimal(workLogs.map(e => e.hoursWorked))
+      : sumDecimal([0]);
+    const avgHoursPerDay = avgHoursPerDayDec.toNumber();
 
     let estimatedCompletionDate = "";
     if (remaining > 0 && avgHoursPerDay > 0) {

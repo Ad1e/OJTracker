@@ -72,6 +72,7 @@ export function useAuth(): AuthState {
     }
 
     let mounted = true;
+    let phase1Succeeded = false;
 
     // ── Safety net: never spin longer than 2 seconds ──────────────────────
     console.log("[useAuth] Setting safety timeout...");
@@ -100,6 +101,7 @@ export function useAuth(): AuthState {
 
         const currentUser = session?.user ?? null;
         setUser(currentUser);
+        phase1Succeeded = true;
         clearTimeout(timeout);
         setLoading(false); // ← spinner gone as soon as session is known
 
@@ -130,9 +132,9 @@ export function useAuth(): AuthState {
         console.log("[useAuth] onAuthStateChange event:", event);
         if (!mounted) return;
 
-        // Skip INITIAL_SESSION — it duplicates Phase 1
-        if (event === "INITIAL_SESSION") {
-           console.log("[useAuth] Skipping INITIAL_SESSION");
+        // Skip INITIAL_SESSION ONLY if Phase 1 already successfully got the session
+        if (event === "INITIAL_SESSION" && phase1Succeeded) {
+           console.log("[useAuth] Skipping INITIAL_SESSION because Phase 1 succeeded");
            return;
         }
 

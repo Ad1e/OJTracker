@@ -14,43 +14,16 @@
 //   └── *                 → /login
 // ─────────────────────────────────────────────────────────────────────────────
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
-import type { ReactNode }                        from "react";
 
-import { AuthProvider }    from "./context/auth-context";
-import { useAuthContext }  from "./context/auth-context";
 import { RouteGuard }      from "./components/guards/route-guard";
+import { PublicRoute }     from "./components/guards/public-route";
+import { RootLayout }      from "./layouts/root-layout";
 
 import { Auth }            from "./components/UI/Auth";
 import AdminDashboard      from "./pages/admin-dashboard";
 import AdminInternView     from "./pages/admin-intern-view";
 import InternDashboard     from "./pages/intern-dashboard";
 import Unauthorized        from "./pages/unauthorized";
-
-// ─── Root layout — provides AuthContext to every route ────────────────────────
-
-function RootLayout() {
-  return (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
-  );
-}
-
-// ─── Public route (/login) ────────────────────────────────────────────────────
-// Reactively redirects already-logged-in users once onAuthStateChange fires.
-
-function PublicRoute({ children }: { children: ReactNode }) {
-  const { user, isAdmin, loading } = useAuthContext();
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-transparent border-t-accent animate-spin" />
-      </div>
-    );
-  }
-  if (user) return <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />;
-  return <>{children}</>;
-}
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 
