@@ -20,7 +20,7 @@ Decimal.set({
 export function sumDecimal(
   numbers: (number | string | Decimal)[]
 ): Decimal {
-  return numbers.reduce(
+  return numbers.reduce<Decimal>(
     (sum, num) => sum.plus(new Decimal(num)),
     new Decimal(0)
   );
